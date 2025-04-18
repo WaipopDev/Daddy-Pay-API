@@ -9,6 +9,7 @@ import { MachineProgramModule } from './machine-program/machine-program.module';
 import { MachineTransactionModule } from './machine-transaction/machine-transaction.module';
 import { PaymentModule } from './payment/payment.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { KbankModule } from './bank/kbank/kbank.module';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { FirebaseModule } from './firebase/firebase.module';
         MachineTransactionModule,
         PaymentModule,
         FirebaseModule,
+        KbankModule,
     ],
     controllers: [AppController],
     providers: [AppService],
