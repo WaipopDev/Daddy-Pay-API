@@ -8,6 +8,7 @@ import { MachineModule } from './machine/machine.module';
 import { MachineProgramModule } from './machine-program/machine-program.module';
 import { MachineTransactionModule } from './machine-transaction/machine-transaction.module';
 import { PaymentModule } from './payment/payment.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { PaymentModule } from './payment/payment.module';
         MachineProgramModule,
         MachineTransactionModule,
         PaymentModule,
+        FirebaseModule,
     ],
     controllers: [AppController],
     providers: [AppService],
