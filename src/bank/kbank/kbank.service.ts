@@ -82,10 +82,13 @@ export class KbankService {
             const keyPath = this.configService.get('KEY_PATH');
             const certPath = this.configService.get('CERT_PATH');
             const key = fs.readFileSync(keyPath);
+            console.log("🚀 ~ KbankService ~ getAccessToken ~ key:", key)
             const cert = fs.readFileSync(certPath);
+            console.log("🚀 ~ KbankService ~ getAccessToken ~ cert:", cert)
 
             const httpsAgent = new https.Agent({ key, cert });
 
+            console.log("🚀 ~ KbankService ~ getAccessToken ~ httpsAgent:", httpsAgent)
             const response = await axios.post(url, payload, {
                 headers: {
                     Authorization: authHeader,
