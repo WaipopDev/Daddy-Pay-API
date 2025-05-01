@@ -37,7 +37,6 @@ export class KbankService {
 
             const httpsAgent = new https.Agent({ key, cert });
             const now = moment();
-            console.log("🚀 ~ KbankService ~ generateKbank ~ httpsAgent:", httpsAgent)
             const param = {
                 merchantId: this.configService.get('MERCHANT_ID_KL'),
                 partnerId: this.configService.get('PARTNER_ID_KL'),
@@ -52,7 +51,7 @@ export class KbankService {
                 txnAmount: data.amount,
                 txnCurrencyCode: 'THB',
             };
-            return await axios.post(url, param, {
+            const response = await axios.post(url, param, {
                 headers: {
                     Authorization: authHeader,
                     'Content-Type': 'application/json',
@@ -60,6 +59,7 @@ export class KbankService {
                 },
                 httpsAgent,
             });
+            return response.data;
         } catch (error) {
             console.error('Error adding document: ', error.response?.data);
             throw new Error(error?.message || 'OAuthKL token request failed');;
@@ -100,7 +100,6 @@ export class KbankService {
                 },
                 httpsAgent,
             });
-            console.log("🚀 ~ KbankService ~ getAccessToken ~ httpsAgent:", response.data)
             return response.data;
         } catch (error) {
             this.logger.error('OAuthKL Token Error:', error.response?.data);
