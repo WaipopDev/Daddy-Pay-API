@@ -47,13 +47,8 @@ export class KbankController {
     ) {
         try {
             // console.log('payload', payload)
-            await this.kbankService.generateKbank(payload);
-            return {
-                resCode: "00",
-                resDesc: "success",
-                transactionId: '',
-                confirmId: "",
-            }
+           const respons = await this.kbankService.generateKbank(payload);
+            return respons;
         } catch (error) {
             console.error('Error in generateKbank: ', error);
             throw new HttpException({
