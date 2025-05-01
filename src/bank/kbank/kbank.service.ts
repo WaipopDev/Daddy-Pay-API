@@ -70,7 +70,7 @@ export class KbankService {
     }
     async getAccessToken(): Promise<any> {
         try {
-            const url = `${this.configService.get('oauthKL')}/v2/oauth/token`;
+            const url = `${this.configService.get('OAUTH_KL')}/v2/oauth/token`;
             const payload = 'grant_type=client_credentials';
 
             const consumerId = this.configService.get('CONSUMER_ID_KL');
