@@ -39,4 +39,30 @@ export class KbankController {
         }
     }
 
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 400, description: HTTP_STATUS_MESSAGES[400] })
+    @Post('generate')
+    async generateKbank(
+        @Body() payload: any, // Define the payload type according to your needs
+    ) {
+        try {
+            // console.log('payload', payload)
+            await this.kbankService.generateKbank(payload);
+            return {
+                resCode: "00",
+                resDesc: "success",
+                transactionId: '',
+                confirmId: "",
+            }
+        } catch (error) {
+            console.error('Error in generateKbank: ', error);
+            throw new HttpException({
+                resCode: "99",
+                resDesc: "error",
+                transactionId: '',
+                confirmId: "",
+            }, HttpStatus.BAD_REQUEST);;
+        }
+    }
+
 }
