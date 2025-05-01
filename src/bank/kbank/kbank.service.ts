@@ -37,6 +37,7 @@ export class KbankService {
 
             const httpsAgent = new https.Agent({ key, cert });
             const now = moment();
+            console.log("🚀 ~ KbankService ~ generateKbank ~ httpsAgent:", httpsAgent)
             const param = {
                 merchantId: this.configService.get('MERCHANT_ID_KL'),
                 partnerId: this.configService.get('PARTNER_ID_KL'),
