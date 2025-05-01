@@ -58,11 +58,11 @@ export class KbankService {
                     'Content-Type': 'application/json',
                     'env-id': 'QR002',
                 },
-                // httpsAgent,
+                httpsAgent,
             });
         } catch (error) {
             console.error('Error adding document: ', error.response?.data);
-            throw error;
+            throw new Error(error?.message || 'OAuthKL token request failed');;
         }
     }
     async createHttpsAgent() {
