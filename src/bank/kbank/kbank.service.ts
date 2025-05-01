@@ -30,7 +30,12 @@ export class KbankService {
             const token = await this.getAccessToken();
             const authHeader = `Bearer ${token.access_token}`;
             const url = `${this.configService.get('OAUTH_KL')}/v1/qrpayment/request`;
-            const { agent } = await this.createHttpsAgent();
+            const keyPath = this.configService.get('KEY_PATH');
+            const certPath = this.configService.get('CERT_PATH');
+            const key = fs.readFileSync(keyPath);
+            const cert = fs.readFileSync(certPath);
+
+            const httpsAgent = new https.Agent({ key, cert });
             const now = moment();
             const param = {
                 merchantId: this.configService.get('MERCHANT_ID_KL'),
@@ -52,7 +57,7 @@ export class KbankService {
                     'Content-Type': 'application/json',
                     'env-id': 'QR002',
                 },
-                httpsAgent: agent,
+                httpsAgent,
             });
         } catch (error) {
             console.error('Error adding document: ', error.response?.data);
