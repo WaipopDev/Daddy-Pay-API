@@ -25,7 +25,7 @@ export class KbankService {
         }
     }
 
-    async generateKbank(data: { amount: number }): Promise<void> {
+    async generateKbank(data: { amount: number, partnerTxnUid: string }): Promise<void> {
         try {
             const firestore = this.firebaseService.getFirestore();
             const docRef = firestore.collection(KB_AUTH);
@@ -72,7 +72,7 @@ export class KbankService {
                 merchantId: this.configService.get('MERCHANT_ID_KL'),
                 partnerId: this.configService.get('PARTNER_ID_KL'),
                 partnerSecret: this.configService.get('PARTNER_SECRET_KL'),
-                partnerTxnUid: `UAT${now.unix()}`,
+                partnerTxnUid: data.partnerTxnUid,
                 qrType: '3',
                 reference1: `INV${now.format('YYYYMMDD')}`,
                 reference2: `INV${now.unix()}`,
