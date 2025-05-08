@@ -18,7 +18,11 @@ export class KbankService {
         try {
             const firestore = this.firebaseService.getFirestore();
             const docRef = firestore.collection(KB_CALLBACK);
-            await docRef.add(data);
+            const setData = {
+                ...data,
+                createdAt: new Date(),
+            }
+            await docRef.add(setData);
         } catch (error) {
             console.error('Error adding document: ', error);
             throw error;

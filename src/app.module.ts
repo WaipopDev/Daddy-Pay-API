@@ -10,6 +10,8 @@ import { MachineTransactionModule } from './machine-transaction/machine-transact
 import { PaymentModule } from './payment/payment.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { KbankModule } from './bank/kbank/kbank.module';
+import { DADDY_PAY_DB } from './config/databases';
+import { AdminAuthModule } from './admin-auth/admin-auth.module';
 
 @Module({
     imports: [
@@ -17,6 +19,7 @@ import { KbankModule } from './bank/kbank/kbank.module';
             isGlobal: true,
             envFilePath: ['.env']
         }),
+        DADDY_PAY_DB,
         AuthModule,
         MachineModule,
         MachineProgramModule,
@@ -24,6 +27,7 @@ import { KbankModule } from './bank/kbank/kbank.module';
         PaymentModule,
         FirebaseModule,
         KbankModule,
+        AdminAuthModule,
     ],
     controllers: [AppController],
     providers: [AppService],
