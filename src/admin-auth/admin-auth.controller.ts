@@ -1,36 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { AdminAuthService } from './admin-auth.service';
 import { CreateAdminAuthDto } from './dto/create-admin-auth.dto';
 import { UpdateAdminAuthDto } from './dto/update-admin-auth.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoginAdminAuthDto, ResponseAdminAuthDto } from './dto/admin-auth.dto';
+import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 
 @ApiTags('AdminAuth')
 @Controller('admin/auth')
 export class AdminAuthController {
-  constructor(private readonly adminAuthService: AdminAuthService) {}
+    constructor(private readonly adminAuthService: AdminAuthService) { }
 
-  @Post()
-  create(@Body() createAdminAuthDto: CreateAdminAuthDto) {
-    return this.adminAuthService.create(createAdminAuthDto);
-  }
+    @Post('create')
+    create(@Body() createAdminAuthDto: CreateAdminAuthDto) {
+        const { email, password, role, active, isAdminLevel } = createAdminAuthDto;
+        if (!email || !password || !role || !active || !isAdminLevel) {
+            throw new UnauthorizedException('Please enter your email, password, access level, user status, and administrator access level.');
+        }
+        return this.adminAuthService.create(createAdminAuthDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.adminAuthService.findAll();
-  }
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @HttpCode(HttpStatus.OK)
+    @Post('signin')
+    login(@Body() loginAdminAuthDto: LoginAdminAuthDto): Promise<ResponseAdminAuthDto> {
+        const { email, password } = loginAdminAuthDto;
+        if (!email || !password) {
+            throw new UnauthorizedException('Please enter your email and password.');
+        }
+        return this.adminAuthService.login(loginAdminAuthDto);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.adminAuthService.findOne(+id);
-  }
+    @Get()
+    findAll() {
+        return this.adminAuthService.findAll();
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAdminAuthDto: UpdateAdminAuthDto) {
-    return this.adminAuthService.update(+id, updateAdminAuthDto);
-  }
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.adminAuthService.findOne(+id);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.adminAuthService.remove(+id);
-  }
+    @Patch(':id')
+    update(@Param('id') id: string, @Body() updateAdminAuthDto: UpdateAdminAuthDto) {
+        return this.adminAuthService.update(+id, updateAdminAuthDto);
+    }
+
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.adminAuthService.remove(+id);
+    }
 }

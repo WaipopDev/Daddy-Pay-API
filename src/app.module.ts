@@ -12,6 +12,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { KbankModule } from './bank/kbank/kbank.module';
 import { DADDY_PAY_DB } from './config/databases';
 import { AdminAuthModule } from './admin-auth/admin-auth.module';
+import { AdminMeModule } from './admin-me/admin-me.module';
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import { AdminAuthModule } from './admin-auth/admin-auth.module';
         FirebaseModule,
         KbankModule,
         AdminAuthModule,
+        AdminMeModule,
     ],
     controllers: [AppController],
     providers: [AppService],

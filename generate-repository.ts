@@ -10,7 +10,7 @@ if (!fullPath) {
   console.error('❌ กรุณาระบุชื่อ repository เช่น: generate-repository.ts user');
   process.exit(1);
 }
-const folderPath = join(__dirname, 'src', fullPath);
+const folderPath = join(__dirname, 'src', 'repositories');
 const name = basename(fullPath);
 const className = `${capitalize(name)}Repository`;
 const fileName = `${name}.repository.ts`;
@@ -21,34 +21,36 @@ if (!existsSync(folderPath)) {
   mkdirSync(folderPath, { recursive: true });
 }
 
-const content = `import { Injectable } from '@nestjs/common';
-import { InjectModel } from 'nest-knexjs';
-import { Knex } from 'knex';
-import { ${capitalize(name)} } from './entities/${name}.entity';
+const content = `import { InjectEntityManager } from '@nestjs/typeorm';
+import { EntityManager } from 'typeorm';
+import { ${capitalize(name)}Entity } from 'src/models/entities/${name}.entity';
 
-@Injectable()
 export class ${className} {
-  constructor(@InjectModel() private readonly knex: Knex) {}
+  constructor(@InjectEntityManager() private readonly db: EntityManager) {}
 
-  async findAll(): Promise<${capitalize(name)}[]> {
-    return this.knex<${capitalize(name)}>('${name}').select('*');
+  private get repo() {
+        return this.db.getRepository(${capitalize(name)}Entity);
   }
 
-  async findById(id: number): Promise<${capitalize(name)} | undefined> {
-    return this.knex<${capitalize(name)}>('${name}').where({ id }).first();
+  async findAll(): Promise<${capitalize(name)}Entity[]> {
+   return this.repo.find();
   }
 
-  async create(data: Partial<${capitalize(name)}>): Promise<number> {
-    const [id] = await this.knex('${name}').insert(data).returning('id');
-    return id;
+  async findById(id: number): Promise<${capitalize(name)}Entity | null> {
+     return this.repo.findOneBy({ id });
   }
 
-  async update(id: number, data: Partial<${capitalize(name)}>): Promise<void> {
-    await this.knex('${name}').where({ id }).update(data);
+  async create(data: Partial<${capitalize(name)}Entity>): Promise<number> {
+        const user = await this.repo.save(data);
+        return user.id;
+  }
+
+  async update(id: number, data: Partial<${capitalize(name)}Entity>): Promise<void> {
+     await this.repo.update(id, data);
   }
 
   async delete(id: number): Promise<void> {
-    await this.knex('${name}').where({ id }).delete();
+     await this.repo.delete(id);
   }
 }
 `;
