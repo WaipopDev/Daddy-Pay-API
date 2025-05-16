@@ -22,6 +22,7 @@ export class AdminAuthGuard implements CanActivate {
         if (!user) throw new UnauthorizedException('User not found');
         request['userId'] = user.id;
         request['rolePermissions'] = user.role
+        request['username'] = user.username
         //     .map((p) => (p.active === true ? p.permission.alias : null))
         //     .filter((p) => p);
 

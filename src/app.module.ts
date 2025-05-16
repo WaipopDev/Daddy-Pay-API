@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -13,6 +13,10 @@ import { KbankModule } from './bank/kbank/kbank.module';
 import { DADDY_PAY_DB } from './config/databases';
 import { AdminAuthModule } from './admin-auth/admin-auth.module';
 import { AdminMeModule } from './admin-me/admin-me.module';
+import { ApplicationMiddleware } from './middlewares/application.middleware';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './Interceptors/logging.interceptor';
+import { LoggerRepository } from './repositories/Logger.repository';
 
 @Module({
     imports: [
@@ -32,6 +36,17 @@ import { AdminMeModule } from './admin-me/admin-me.module';
         AdminMeModule,
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [
+        { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+        LoggerRepository,
+        AppService
+    ],
 })
-export class AppModule { }
+
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer
+            .apply(ApplicationMiddleware)
+            .forRoutes({ path: '/*path', method: RequestMethod.ALL });
+    }
+}

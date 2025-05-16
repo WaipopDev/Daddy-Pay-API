@@ -12,6 +12,7 @@ async function bootstrap() {
         defaultVersion: '1',
     });
     app.setGlobalPrefix('api');
+
     // Validation
     app.useGlobalPipes(
         new ValidationPipe({
