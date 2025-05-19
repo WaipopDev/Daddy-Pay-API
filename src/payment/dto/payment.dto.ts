@@ -14,7 +14,7 @@ import {
   } from 'class-validator';
 
 
-export class ResponseDTO {
+export class ResponsePaymentDTO {
 
     @ApiProperty({ description: 'Status' })
     @IsString()

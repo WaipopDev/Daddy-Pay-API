@@ -113,7 +113,7 @@ export class PayloadMachineDTO {
 
 export class BodyPayloadMachineDTO extends PayloadMachineDTO {}
 
-export class ResponseDTO {
+export class ResponseMachineTransactionDTO {
     @ApiProperty({ description: 'status' })
     @IsString()
     status: string;
