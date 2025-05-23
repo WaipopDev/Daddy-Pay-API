@@ -80,7 +80,7 @@ export class AdminAuthService {
                 secret: this.config.get<string>('JWT_ADMIN_SECRET'),
             });
         } catch (e) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Invalid token');
         }
     }
 

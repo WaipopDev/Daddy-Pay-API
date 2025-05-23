@@ -41,8 +41,8 @@ export class ${className} {
   }
 
   async create(data: Partial<${capitalize(name)}Entity>): Promise<number> {
-        const user = await this.repo.save(data);
-        return user.id;
+        const item = await this.repo.save(data);
+        return item.id;
   }
 
   async update(id: number, data: Partial<${capitalize(name)}Entity>): Promise<void> {

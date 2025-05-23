@@ -17,6 +17,7 @@ import { ApplicationMiddleware } from './middlewares/application.middleware';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './Interceptors/logging.interceptor';
 import { LoggerRepository } from './repositories/Logger.repository';
+import { LanguageModule } from './language/language.module';
 
 @Module({
     imports: [
@@ -34,6 +35,7 @@ import { LoggerRepository } from './repositories/Logger.repository';
         KbankModule,
         AdminAuthModule,
         AdminMeModule,
+        LanguageModule,
     ],
     controllers: [AppController],
     providers: [
