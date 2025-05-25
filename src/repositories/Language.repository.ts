@@ -15,7 +15,10 @@ export class LanguageRepository {
    }
 
    async findAll(): Promise<LangMainEntity[]> {
-      return this.repoMain.find();
+      return this.repoMain.find({
+         where: { active: true },
+         order: { langCode: 'ASC' },
+      });
    }
 
    async findByCode(code: string): Promise<ResponseLanguageDto[] | null> {
@@ -31,6 +34,7 @@ export class LanguageRepository {
             'list.langKey AS "langKey"',
             'list.langName AS "langName"',
          ])
+         .orderBy('list.langKey', 'ASC')
          .getRawMany();
       // return this.repoMain.findOneBy({ langCode: code });
    }

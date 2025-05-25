@@ -8,12 +8,13 @@ import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 
 @ApiTags('Language')
-@ApiBearerAuth()
-@UseGuards(AdminAuthGuard)
+
 @Controller('language')
 export class LanguageController {
     constructor(private readonly languageService: LanguageService) { }
 
+    @ApiBearerAuth()
+    @UseGuards(AdminAuthGuard)
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @HttpCode(HttpStatus.OK)
@@ -22,6 +23,8 @@ export class LanguageController {
         return this.languageService.create(createLanguageMainDto, userId);
     }
 
+    @ApiBearerAuth()
+    @UseGuards(AdminAuthGuard)
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @HttpCode(HttpStatus.OK)
@@ -41,16 +44,28 @@ export class LanguageController {
         return this.languageService.findByCode(langCode);
     }
 
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @HttpCode(HttpStatus.OK)
+    @Get('all')
+    findAll() {
+        return this.languageService.findAll();
+    }
+
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.languageService.findOne(+id);
     }
 
+    @ApiBearerAuth()
+    @UseGuards(AdminAuthGuard)
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateLanguageDto: UpdateLanguageMainDto) {
         return this.languageService.update(+id, updateLanguageDto);
     }
 
+    @ApiBearerAuth()
+    @UseGuards(AdminAuthGuard)
     @Delete(':id')
     remove(@Param('id') id: string) {
         return this.languageService.remove(+id);

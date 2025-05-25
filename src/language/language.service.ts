@@ -5,7 +5,7 @@ import { LangMainEntity } from 'src/models/entities/LangMain.entity';
 import { LanguageRepository } from 'src/repositories/Language.repository';
 import { LangListEntity } from 'src/models/entities/LangList.entity';
 import { ResponseLanguageDto } from './dto/language.dto';
-
+import _ from 'lodash';
 @Injectable()
 export class LanguageService {
     constructor(private languageRepository: LanguageRepository) { }
@@ -44,8 +44,8 @@ export class LanguageService {
         return data
     }
 
-    findAll() {
-        return `This action returns all language`;
+   async findAll(): Promise<LangMainEntity[]> {
+      return  await this.languageRepository.findAll()
     }
 
     findOne(id: number) {
