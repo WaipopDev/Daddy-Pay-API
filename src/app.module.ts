@@ -18,6 +18,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './Interceptors/logging.interceptor';
 import { LoggerRepository } from './repositories/Logger.repository';
 import { LanguageModule } from './language/language.module';
+import { ShopInfoModule } from './shop-info/shop-info.module';
 
 @Module({
     imports: [
@@ -36,6 +37,7 @@ import { LanguageModule } from './language/language.module';
         AdminAuthModule,
         AdminMeModule,
         LanguageModule,
+        ShopInfoModule,
     ],
     controllers: [AppController],
     providers: [
