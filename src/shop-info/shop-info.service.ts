@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { CreateShopInfoDto } from './dto/create-shop-info.dto';
 import { UpdateShopInfoDto } from './dto/update-shop-info.dto';
 import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
@@ -15,7 +15,10 @@ export class ShopInfoService {
 
     async create(createShopInfoDto: CreateShopInfoDto, userId: number, file?: Express.Multer.File): Promise<{ id: number }> {
         createShopInfoDto.shopKey = await this.generateUniqueShopKey();
-        
+        const checkCode = await this.shopInfoRepository.findShopInfoByCode(createShopInfoDto.shopCode)
+        if (checkCode) {
+            throw new UnauthorizedException('Shop code already exists');
+        }
         // Upload file to Firebase Storage if provided
         if (file) {
             try {
@@ -31,7 +34,7 @@ export class ShopInfoService {
                 createShopInfoDto.shopUploadFile = fileUrl;
             } catch (error) {
                 console.error('Error uploading file to Firebase:', error);
-                throw new BadRequestException(error.message || 'Failed to upload file');
+                throw new UnauthorizedException(error.message || 'Failed to upload file');
             }
         }
         

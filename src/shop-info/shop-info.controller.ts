@@ -31,9 +31,9 @@ export class ShopInfoController {
         @Body() createShopInfoMultipartDto: CreateShopInfoMultipartDto,
         @UploadedFile() file: Express.Multer.File
     ) { 
-        // Transform multipart DTO to standard DTO
+
         const createShopInfoDto: CreateShopInfoDto = {
-            shopKey: createShopInfoMultipartDto.shopKey,
+            // shopKey: createShopInfoMultipartDto.shopKey,
             shopCode: createShopInfoMultipartDto.shopCode,
             shopName: createShopInfoMultipartDto.shopName,
             shopAddress: createShopInfoMultipartDto.shopAddress || '',

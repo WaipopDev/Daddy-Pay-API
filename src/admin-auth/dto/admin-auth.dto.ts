@@ -19,3 +19,22 @@ export class ResponseAdminAuthDto {
     @ApiProperty({ description: 'Token สำหรับเข้าใช้งานระบบ' })
     accessToken: string;
 }
+
+export class RefreshTokenResponseDto {
+    @ApiProperty({ description: 'Token ใหม่สำหรับเข้าใช้งานระบบ' })
+    accessToken: string;
+
+    @ApiProperty({ description: 'ข้อความตอบกลับ', default: 'Token refreshed successfully' })
+    message: string;
+}
+
+export class TokenValidationResponseDto {
+    @ApiProperty({ description: 'ระบุว่าควร refresh token หรือไม่' })
+    shouldRefresh: boolean;
+
+    @ApiProperty({ description: 'Token ใหม่ (ถ้ามีการ refresh)', required: false })
+    newToken?: string;
+
+    @ApiProperty({ description: 'ข้อมูลใน token payload' })
+    payload: any;
+}

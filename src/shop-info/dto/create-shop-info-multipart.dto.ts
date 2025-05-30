@@ -53,7 +53,7 @@ export class CreateShopInfoMultipartDto {
 
   @ApiPropertyOptional({ description: 'Shop email', maxLength: 100 })
   @IsOptional()
-  @IsEmail()
+  @IsString()
   @MaxLength(100)
   shopEmail?: string;
 

@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UnauthorizedException, UseGuards, Req } from '@nestjs/common';
 import { AdminAuthService } from './admin-auth.service';
 import { CreateAdminAuthDto } from './dto/create-admin-auth.dto';
 import { UpdateAdminAuthDto } from './dto/update-admin-auth.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { LoginAdminAuthDto, ResponseAdminAuthDto } from './dto/admin-auth.dto';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoginAdminAuthDto, ResponseAdminAuthDto, RefreshTokenResponseDto } from './dto/admin-auth.dto';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
+import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
+import { User } from 'src/decorators/user.decorator';
 
 @ApiTags('AdminAuth')
 @Controller('admin/auth')
@@ -30,6 +32,20 @@ export class AdminAuthController {
             throw new UnauthorizedException('Please enter your email and password.');
         }
         return this.adminAuthService.login(loginAdminAuthDto);
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(AdminAuthGuard)
+    @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @HttpCode(HttpStatus.OK)
+    @Post('refresh-token')
+    async refreshToken(@User() userId: number): Promise<RefreshTokenResponseDto> {
+        const newToken = await this.adminAuthService.refreshTokenByUserId(userId);
+        return {
+            accessToken: newToken,
+            message: 'Token refreshed successfully'
+        };
     }
 
     @Get()

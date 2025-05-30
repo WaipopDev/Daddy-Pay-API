@@ -11,15 +11,25 @@ export class AdminAuthGuard implements CanActivate {
     ) { }
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
+        const response = context.switchToHttp().getResponse();
 
         const token = this.extractTokenFromHeader(request);
         if (!token) throw new UnauthorizedException('Token not found');
-        let payload = this.authService.validate(token);
+        
+        // ตรวจสอบและ refresh token ถ้าจำเป็น
+        const tokenResult = await this.authService.checkAndRefreshToken(token);
+        
+        if (!tokenResult.payload) throw new UnauthorizedException('Invalid token');
 
-        if (!payload) throw new UnauthorizedException('Invalid token');
+        // ถ้า token ถูก refresh ให้ส่ง token ใหม่กลับผ่าน header
+        if (tokenResult.shouldRefresh && tokenResult.newToken) {
+            response.setHeader('X-New-Token', tokenResult.newToken);
+            response.setHeader('X-Token-Refreshed', 'true');
+        }
 
-        const user = await this.authService.getUserById(payload.sub);
+        const user = await this.authService.getUserById(tokenResult.payload.sub);
         if (!user) throw new UnauthorizedException('User not found');
+        
         request['userId'] = user.id;
         request['rolePermissions'] = user.role
         request['username'] = user.username
