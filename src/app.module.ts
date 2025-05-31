@@ -14,11 +14,12 @@ import { DADDY_PAY_DB } from './config/databases';
 import { AdminAuthModule } from './admin-auth/admin-auth.module';
 import { AdminMeModule } from './admin-me/admin-me.module';
 import { ApplicationMiddleware } from './middlewares/application.middleware';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from './Interceptors/logging.interceptor';
 import { LoggerRepository } from './repositories/Logger.repository';
 import { LanguageModule } from './language/language.module';
 import { ShopInfoModule } from './shop-info/shop-info.module';
+import { IdEncoderExceptionFilter } from './filters/id-encoder-exception.filter';
 
 @Module({
     imports: [
@@ -42,6 +43,7 @@ import { ShopInfoModule } from './shop-info/shop-info.module';
     controllers: [AppController],
     providers: [
         { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+        { provide: APP_FILTER, useClass: IdEncoderExceptionFilter },
         LoggerRepository,
         AppService
     ],
