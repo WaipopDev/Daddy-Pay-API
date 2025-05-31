@@ -84,11 +84,7 @@ export class AdminAuthService {
         }
     }
 
-    /**
-     * ตรวจสอบ token และถ้าเหลือเวลาน้อยกว่า 10 นาที จะ refresh token ใหม่
-     * @param token JWT token ที่ต้องการตรวจสอบ
-     * @returns object ที่มี shouldRefresh และ newToken (ถ้า refresh)
-     */
+
     async checkAndRefreshToken(token: string): Promise<{
         shouldRefresh: boolean;
         newToken?: string;

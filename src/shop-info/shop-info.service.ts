@@ -5,6 +5,10 @@ import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { FileValidationService } from 'src/utility/file-validation.service';
+import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto } from './dto/shoo-info.dto';
+import { PaginationDto } from 'src/constants/pagination.constant';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ShopInfoService {
@@ -46,12 +50,51 @@ export class ShopInfoService {
         return { id };
     }
 
-    async findAll(): Promise<ShopInfoEntity[]> {
-        return this.shopInfoRepository.findAll();
+    async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<ResponseShopInfoDto>> {
+        // Get the raw entity data using the existing findAll method
+        const result = await this.shopInfoRepository.findAll(option, sort);
+        
+        // Transform each entity to ResponseShopInfoDto using class-transformer
+        // This ensures the @EncodeId decorator is properly applied
+        const transformedItems = result.items.map(item => 
+            plainToInstance(ResponseShopInfoDto, item, { 
+                excludeExtraneousValues: false,
+                enableImplicitConversion: true 
+            })
+        );
+
+        return {
+            ...result,
+            items: transformedItems
+        };
     }
 
-    async findOne(id: number): Promise<ShopInfoEntity | null> {
-        return this.shopInfoRepository.findById(id);
+    async findList(): Promise<ResponseShopInfoListDto[]> {
+        const result = await this.shopInfoRepository.findList();
+        
+        // Transform each entity to ResponseShopInfoListDto using class-transformer
+        // This ensures the @EncodeId decorator is properly applied
+        return result.map(item => 
+            plainToInstance(ResponseShopInfoListDto, item, { 
+                excludeExtraneousValues: false,
+                enableImplicitConversion: true 
+            })
+        );
+    }
+
+    async findOne(id: number): Promise<ResponseShopInfoDto | null> {
+        const result = await this.shopInfoRepository.findById(id);
+        
+        if (!result) {
+            return null;
+        }
+        
+        // Transform entity to ResponseShopInfoDto using class-transformer
+        // This ensures the @EncodeId decorator is properly applied
+        return plainToInstance(ResponseShopInfoDto, result, { 
+            excludeExtraneousValues: false,
+            enableImplicitConversion: true 
+        });
     }
 
     async update(id: number, updateShopInfoDto: UpdateShopInfoDto): Promise<void> {

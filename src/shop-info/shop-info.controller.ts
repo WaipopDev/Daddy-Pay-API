@@ -1,17 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, UseInterceptors, UploadedFile, Query, BadRequestException, ClassSerializerInterceptor } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ShopInfoService } from './shop-info.service';
 import { CreateShopInfoDto } from './dto/create-shop-info.dto';
 import { CreateShopInfoMultipartDto } from './dto/create-shop-info-multipart.dto';
 import { UpdateShopInfoDto } from './dto/update-shop-info.dto';
-import { ApiBearerAuth, ApiResponse, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags, ApiConsumes, ApiBody, ApiQuery, ApiOperation } from '@nestjs/swagger';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { User } from 'src/decorators/user.decorator';
+import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto } from './dto/shoo-info.dto';
+import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
+import { IdEncoderService } from 'src/utility/id-encoder.service';
+import { PaginationDto } from 'src/constants/pagination.constant';
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 @ApiTags('Shop Info')
 @ApiBearerAuth()
 @UseGuards(AdminAuthGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('shop-info')
 export class ShopInfoController {
     constructor(private readonly shopInfoService: ShopInfoService) { }
@@ -56,23 +62,80 @@ export class ShopInfoController {
         return this.shopInfoService.create(createShopInfoDto, userId, file);
     }
 
+    @ApiOperation({ 
+        summary: 'ดึงรายการข้อมูลร้านค้าแบบ pagination', 
+        description: 'API สำหรับดึงรายการข้อมูลร้านค้าทั้งหมดพร้อมการแบ่งหน้าและการเรียงลำดับ (ID เข้ารหัสด้วย @EncodeId decorator)' 
+    })
+    @ApiResponse({ 
+        status: 200, 
+        description: HTTP_STATUS_MESSAGES[200],
+        type: PaginatedShopInfoResponseDto
+    })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @Get()
-    findAll() {
-        return this.shopInfoService.findAll();
+    findAll(
+        @Query() option: PaginationDto,
+        @Query() sort: SortDto,
+    ): Promise<Pagination<ResponseShopInfoDto>> {
+        return this.shopInfoService.findAll(option, sort);
     }
 
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200], type: ResponseShopInfoListDto, isArray: true })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @HttpCode(HttpStatus.OK)
+    @Get('list')
+    findList():Promise<ResponseShopInfoListDto[]> {
+        return this.shopInfoService.findList();
+    }
+
+    @ApiOperation({ 
+        summary: 'ดึงข้อมูลร้านค้าตาม ID', 
+        description: 'API สำหรับดึงข้อมูลร้านค้าตาม ID ที่เข้ารหัสแล้ว' 
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.shopInfoService.findOne(+id);
+    async findOne(@Param('id') encodedId: string): Promise<ResponseShopInfoDto | null> {
+        try {
+            const id = IdEncoderService.decode(encodedId);
+            return this.shopInfoService.findOne(id);
+        } catch (error) {
+            throw new BadRequestException('Invalid shop ID format');
+        }
     }
 
+    @ApiOperation({ 
+        summary: 'อัพเดทข้อมูลร้านค้า', 
+        description: 'API สำหรับอัพเดทข้อมูลร้านค้าตาม ID ที่เข้ารหัสแล้ว' 
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
     @Patch(':id')
-    update(@Param('id') id: string, @Body() updateShopInfoDto: UpdateShopInfoDto) {
-        return this.shopInfoService.update(+id, updateShopInfoDto);
+    async update(@Param('id') encodedId: string, @Body() updateShopInfoDto: UpdateShopInfoDto) {
+        try {
+            const id = IdEncoderService.decode(encodedId);
+            return this.shopInfoService.update(id, updateShopInfoDto);
+        } catch (error) {
+            throw new BadRequestException('Invalid shop ID format');
+        }
     }
 
+    @ApiOperation({ 
+        summary: 'ลบข้อมูลร้านค้า', 
+        description: 'API สำหรับลบข้อมูลร้านค้าตาม ID ที่เข้ารหัสแล้ว' 
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.shopInfoService.remove(+id);
+    async remove(@Param('id') encodedId: string) {
+        try {
+            const id = IdEncoderService.decode(encodedId);
+            return this.shopInfoService.remove(id);
+        } catch (error) {
+            throw new BadRequestException('Invalid shop ID format');
+        }
     }
 }

@@ -26,12 +26,12 @@ export class AdminAuthController {
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @HttpCode(HttpStatus.OK)
     @Post('signin')
-    login(@Body() loginAdminAuthDto: LoginAdminAuthDto): Promise<ResponseAdminAuthDto> {
+    async login(@Body() loginAdminAuthDto: LoginAdminAuthDto): Promise<ResponseAdminAuthDto> {
         const { email, password } = loginAdminAuthDto;
         if (!email || !password) {
             throw new UnauthorizedException('Please enter your email and password.');
         }
-        return this.adminAuthService.login(loginAdminAuthDto);
+        return await this.adminAuthService.login(loginAdminAuthDto);
     }
 
     @ApiBearerAuth()

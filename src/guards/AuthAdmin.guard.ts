@@ -17,7 +17,16 @@ export class AdminAuthGuard implements CanActivate {
         if (!token) throw new UnauthorizedException('Token not found');
         
         // ตรวจสอบและ refresh token ถ้าจำเป็น
-        const tokenResult = await this.authService.checkAndRefreshToken(token);
+        let tokenResult;
+        try {
+            tokenResult = await this.authService.checkAndRefreshToken(token);
+        } catch (error) {
+            // ถ้า token หมดอายุ ให้ set header เพื่อแจ้ง frontend
+            if (error instanceof UnauthorizedException && error.message === 'Token expired') {
+                response.setHeader('X-Token-Expired', 'true');
+            }
+            throw error;
+        }
         
         if (!tokenResult.payload) throw new UnauthorizedException('Invalid token');
 

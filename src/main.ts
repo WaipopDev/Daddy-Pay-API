@@ -5,7 +5,11 @@ import { BadRequestException, ValidationPipe, VersioningType } from '@nestjs/com
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    app.enableCors();
+    app.enableCors({
+        origin: true, // หรือกำหนด specific domains ตามต้องการ
+        credentials: true,
+        exposedHeaders: ['X-Token-Expired', 'X-New-Token', 'X-Token-Refreshed']
+    });
 
     app.enableVersioning({
         type: VersioningType.URI,
