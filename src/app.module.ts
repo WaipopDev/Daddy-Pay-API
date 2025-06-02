@@ -21,6 +21,7 @@ import { LanguageModule } from './language/language.module';
 import { ShopInfoModule } from './shop-info/shop-info.module';
 import { IdEncoderExceptionFilter } from './filters/id-encoder-exception.filter';
 import { MachineInfoModule } from './machine-info/machine-info.module';
+import { ProgramInfoModule } from './program-info/program-info.module';
 
 @Module({
     imports: [
@@ -41,6 +42,7 @@ import { MachineInfoModule } from './machine-info/machine-info.module';
         LanguageModule,
         ShopInfoModule,
         MachineInfoModule,
+        ProgramInfoModule,
     ],
     controllers: [AppController],
     providers: [

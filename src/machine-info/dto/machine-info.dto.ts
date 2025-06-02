@@ -124,20 +124,4 @@ export class PaginatedMachineInfoResponseDto {
         totalPages: number;
         currentPage: number;
     };
-
-    @ApiProperty({
-        description: 'Pagination links',
-        example: {
-            first: "http://example.com/api/machine-info?limit=10",
-            previous: "",
-            next: "http://example.com/api/machine-info?page=2&limit=10",
-            last: "http://example.com/api/machine-info?page=10&limit=10"
-        }
-    })
-    links: {
-        first?: string;
-        previous?: string;
-        next?: string;
-        last?: string;
-    };
 }

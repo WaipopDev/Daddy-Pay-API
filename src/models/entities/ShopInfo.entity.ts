@@ -37,7 +37,7 @@ export class ShopInfoEntity extends DefaultEntity {
     @Column({ name: 'shop_system_name', type: 'varchar', length: 255 })
     shopSystemName: string;
 
-    @Column({ name: 'shop_upload_file', type: 'varchar', length: 500, nullable: true })
+    @Column({ name: 'shop_upload_file', type: 'text', nullable: true })
     shopUploadFile: string;
 
     @Column({ name: 'shop_tax_name', type: 'varchar', length: 255, nullable: true })

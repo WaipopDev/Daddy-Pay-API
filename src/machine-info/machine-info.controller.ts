@@ -35,7 +35,7 @@ export class MachineInfoController {
     async create(
         @User() userId: number,
         @Body() createMachineInfoMultipartDto: CreateMachineInfoMultipartDto,
-        @UploadedFile() file: Express.Multer.File
+        @UploadedFile() file?: Express.Multer.File
     ) { 
 
         const createMachineInfoDto: CreateMachineInfoDto = {

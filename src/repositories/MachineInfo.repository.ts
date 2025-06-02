@@ -5,6 +5,7 @@ import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginat
 import { MachineInfoEntity } from 'src/models/entities/MachineInfo.entity';
 import { ResponseMachineInfoListDto, SortDto } from 'src/machine-info/dto/machine-info.dto';
 import { PaginationDto } from 'src/constants/pagination.constant';
+import { KeyGeneratorService } from 'src/utility/key-generator.service';
 
 export class MachineInfoRepository {
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
@@ -58,9 +59,7 @@ export class MachineInfoRepository {
         ]);
 
         queryBuilder.where('machineInfo.deletedAt IS NULL');
-        
-        // Apply sorting
-        console.log('sort', sort)
+
         if (sort.column && sort.sort) {
             queryBuilder.orderBy(`machineInfo.${sort.column}`, sort.sort);
         }
@@ -113,5 +112,17 @@ export class MachineInfoRepository {
         return queryBuilder.getOne();
     }
 
-    
+    async generateUniqueMachineKey(): Promise<string> {
+        let counter = 1;
+
+        while (true) {
+            const machineKey = `MACHINE_${KeyGeneratorService.generateRandomKey(8)}_${counter.toString().padStart(3, '0')}`;
+
+            const existingMachine = await this.findMachineInfoByKey(machineKey);
+            if (!existingMachine) {
+                return machineKey;
+            }
+            counter++;
+        }
+    }
 }

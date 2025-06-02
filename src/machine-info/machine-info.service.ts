@@ -19,7 +19,7 @@ export class MachineInfoService {
     ) { }
 
     async create(createMachineInfoDto: CreateMachineInfoDto, userId: number, file?: Express.Multer.File): Promise<{ id: number }> {
-        createMachineInfoDto.machineKey = await this.generateUniqueMachineKey();
+        createMachineInfoDto.machineKey = await this.machineInfoRepository.generateUniqueMachineKey();
         
         // Upload file to Firebase Storage if provided
         if (file) {
@@ -48,19 +48,7 @@ export class MachineInfoService {
         return { id };
     }
 
-    async generateUniqueMachineKey(): Promise<string> {
-        let counter = 1;
-
-        while (true) {
-            const machineKey = `MACHINE_${KeyGeneratorService.generateRandomKey(8)}_${counter.toString().padStart(3, '0')}`;
-            
-            const existingMachine = await this.machineInfoRepository.findMachineInfoByKey(machineKey);
-            if (!existingMachine) {
-                return machineKey;
-            }
-            counter++;
-        }
-    }
+    
 
     async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<ResponseMachineInfoDto>> {
         const result = await this.machineInfoRepository.findAll(option, sort);
@@ -71,8 +59,7 @@ export class MachineInfoService {
 
         return {
             items: transformedItems,
-            meta: result.meta,
-            links: result.links
+            meta: result.meta
         };
     }
 
