@@ -180,7 +180,7 @@ export class ShopInfoRepository {
         });
     }
 
-    async findAllWithDto(option: PaginationDto, sort: SortDto): Promise<Pagination<any>> {
+    async findAllWithDto(option: PaginationDto, sort: SortDto): Promise<Pagination<ResponseShopInfoListDto>> {
         const queryBuilder = this.repo.createQueryBuilder('shopInfo');
         
         queryBuilder.select([

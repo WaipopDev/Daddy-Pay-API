@@ -60,6 +60,7 @@ export class MachineInfoRepository {
         queryBuilder.where('machineInfo.deletedAt IS NULL');
         
         // Apply sorting
+        console.log('sort', sort)
         if (sort.column && sort.sort) {
             queryBuilder.orderBy(`machineInfo.${sort.column}`, sort.sort);
         }
