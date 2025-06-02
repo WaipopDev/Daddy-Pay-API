@@ -20,6 +20,7 @@ import { LoggerRepository } from './repositories/Logger.repository';
 import { LanguageModule } from './language/language.module';
 import { ShopInfoModule } from './shop-info/shop-info.module';
 import { IdEncoderExceptionFilter } from './filters/id-encoder-exception.filter';
+import { MachineInfoModule } from './machine-info/machine-info.module';
 
 @Module({
     imports: [
@@ -39,6 +40,7 @@ import { IdEncoderExceptionFilter } from './filters/id-encoder-exception.filter'
         AdminMeModule,
         LanguageModule,
         ShopInfoModule,
+        MachineInfoModule,
     ],
     controllers: [AppController],
     providers: [

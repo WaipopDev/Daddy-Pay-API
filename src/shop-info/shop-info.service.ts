@@ -5,6 +5,7 @@ import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { FileValidationService } from 'src/utility/file-validation.service';
+import { KeyGeneratorService } from 'src/utility/key-generator.service';
 import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto } from './dto/shoo-info.dto';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -133,21 +134,10 @@ export class ShopInfoService {
         let isUnique = false;
 
         while (!isUnique) {
-            shopKey = this.generateRandomKey(10);
+            shopKey = KeyGeneratorService.generateRandomKey(10);
             isUnique = !(await this.checkShopKeyExists(shopKey));
         }
 
         return shopKey;
-    }
-
-    private generateRandomKey(length: number): string {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = '';
-
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-
-        return result;
     }
 }
