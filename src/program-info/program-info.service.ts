@@ -56,8 +56,7 @@ export class ProgramInfoService {
     
     const options: IPaginationOptions = {
       page,
-      limit,
-      route: '/api/program-info',
+      limit
     };
 
     let result;
@@ -76,8 +75,7 @@ export class ProgramInfoService {
 
     return {
       items,
-      meta: result.meta,
-      links: result.links,
+      meta: result.meta
     };
   }
 

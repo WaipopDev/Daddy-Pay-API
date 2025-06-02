@@ -38,17 +38,17 @@ export class ProgramInfoController {
     summary: 'สร้างข้อมูลโปรแกรม', 
     description: 'API สำหรับสร้างข้อมูลโปรแกรมใหม่' 
   })
-  @ApiResponse({ status: 201, description: HTTP_STATUS_MESSAGES[201], type: ResponseProgramInfoDto })
+  @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200], type: ResponseProgramInfoDto })
   @ApiResponse({ status: 400, description: HTTP_STATUS_MESSAGES[400] })
   @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
   @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลเครื่อง' })
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @Post()
   async create(
     @User() userId: number,
     @Body() createProgramInfoDto: CreateProgramInfoDto
   ): Promise<ResponseProgramInfoDto> {
-    return this.programInfoService.create(createProgramInfoDto, userId);
+    return  this.programInfoService.create(createProgramInfoDto, userId);
   }
 
   @ApiOperation({ 

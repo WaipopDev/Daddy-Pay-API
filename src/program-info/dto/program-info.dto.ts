@@ -1,7 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { IsString, IsOptional, IsEnum, IsDateString, IsNumber } from 'class-validator';
+import { ESort } from 'src/constants/query.type';
 import { EncodeId } from 'src/utility/id-encoder.decorators';
+
+export enum ESortColumn {
+  PROGRAM_NAME = 'programName',
+}
+
+export class SortDto {
+  @ApiPropertyOptional({ description: 'เรียงลำดับข้อมูล', enum: ESortColumn })
+  @IsOptional()
+  @IsEnum(ESortColumn)
+  column?: ESortColumn = ESortColumn.PROGRAM_NAME;
+
+  @ApiPropertyOptional({ description: 'เรียงลำดับข้อมูล', enum: ESort })
+  @IsEnum(ESort)
+  @IsOptional()
+  sort?: ESort = ESort.DESC;
+}
 
 export class ResponseMachineInfoDto {
     @ApiProperty({ description: 'Machine ID (encoded)' })
@@ -73,25 +90,6 @@ export class ResponseProgramInfoDto {
 
 export class ResponseProgramInfoListDto extends ResponseProgramInfoDto {}
 
-export class SortDto {
-    @ApiPropertyOptional({ 
-        description: 'Field to sort by',
-        enum: ['programName', 'createdAt', 'updatedAt'],
-        example: 'createdAt'
-    })
-    @IsOptional()
-    @IsEnum(['programName', 'createdAt', 'updatedAt'])
-    sortBy?: string;
-
-    @ApiPropertyOptional({ 
-        description: 'Sort order',
-        enum: ['asc', 'desc'],
-        example: 'desc'
-    })
-    @IsOptional()
-    @IsEnum(['asc', 'desc'])
-    sortOrder?: string;
-}
 
 export class QueryProgramInfoDto extends SortDto {
     @ApiPropertyOptional({ description: 'Page number', example: 1 })
@@ -123,13 +121,5 @@ export class ProgramInfoPaginationDto {
         itemsPerPage: number;
         totalPages: number;
         currentPage: number;
-    };
-
-    @ApiProperty({ description: 'Pagination links' })
-    links: {
-        first: string;
-        previous: string;
-        next: string;
-        last: string;
     };
 }

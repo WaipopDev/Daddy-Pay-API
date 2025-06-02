@@ -50,8 +50,13 @@ export class ProgramInfoRepository {
     }
 
     async createProgramInfo(programInfoData: Partial<ProgramInfoEntity>): Promise<ProgramInfoEntity> {
-        const programInfo = this.repo.create(programInfoData);
-        return this.repo.save(programInfo);
+        try {
+            const programInfo = this.repo.create(programInfoData);
+            return await this.repo.save(programInfo);
+        } catch (error) {
+            console.error("🚀 ~ ProgramInfoRepository ~ createProgramInfo ~ error:", error);
+            throw error;
+        }
     }
 
     async updateProgramInfo(id: number, updateData: Partial<ProgramInfoEntity>): Promise<void> {
@@ -85,17 +90,13 @@ export class ProgramInfoRepository {
                 'program_info.updatedBy',
                 'machine_info.id',
                 'machine_info.machineKey',
-                'machine_info.machineName',
+                'machine_info.machineType',
+                'machine_info.machineBrand',
             ]);
 
         // Apply sorting
-        if (sort?.sortBy && sort?.sortOrder) {
-            const validSortFields = ['programName', 'createdAt', 'updatedAt'];
-            if (validSortFields.includes(sort.sortBy)) {
-                queryBuilder.orderBy(`program_info.${sort.sortBy}`, sort.sortOrder.toUpperCase() as 'ASC' | 'DESC');
-            }
-        } else {
-            queryBuilder.orderBy('program_info.createdAt', 'DESC');
+        if (sort?.column && sort?.sort) {
+            queryBuilder.orderBy(`program_info.${sort.column}`, sort.sort);
         }
 
         return paginate<ProgramInfoEntity>(queryBuilder, options);
@@ -118,7 +119,8 @@ export class ProgramInfoRepository {
                 'program_info.updatedBy',
                 'machine_info.id',
                 'machine_info.machineKey',
-                'machine_info.machineName',
+                'machine_info.machineType',
+                'machine_info.machineBrand',
             ])
             .orderBy('program_info.createdAt', 'DESC');
 
@@ -140,7 +142,7 @@ export class ProgramInfoRepository {
             select: { id: true }
         });
 
-        return !existingProgram;
+        return !existingProgram; // Returns true if NO existing program (unique)
     }
 
     async generateUniqueProgramKey(): Promise<string> {
@@ -149,8 +151,8 @@ export class ProgramInfoRepository {
         while (true) {
             const programKey = `PROG_${KeyGeneratorService.generateRandomKey(8)}_${counter.toString().padStart(3, '0')}`;
 
-            const existingProgram = await this.isProgramKeyUnique(programKey);
-            if (!existingProgram) {
+            const isUnique = await this.isProgramKeyUnique(programKey);
+            if (isUnique) {
                 return programKey;
             }
             counter++;

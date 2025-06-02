@@ -91,8 +91,8 @@ export class MachineInfoRepository {
     }
 
     async create(data: Partial<MachineInfoEntity>): Promise<number> {
-        const result = await this.repo.insert(data);
-        return result.identifiers[0].id;
+        const result = await this.repo.save(data);
+        return result.id;
     }
 
     async update(id: number, data: Partial<MachineInfoEntity>): Promise<void> {
