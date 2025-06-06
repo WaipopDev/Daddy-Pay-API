@@ -27,7 +27,7 @@ export class AdminAuthGuard implements CanActivate {
             }
             throw error;
         }
-        response.setHeader('X-Token-Refreshed', 'true');
+
         if (!tokenResult.payload) throw new UnauthorizedException('Invalid token');
 
         // ถ้า token ถูก refresh ให้ส่ง token ใหม่กลับผ่าน header

@@ -22,6 +22,7 @@ import { ShopInfoModule } from './shop-info/shop-info.module';
 import { IdEncoderExceptionFilter } from './filters/id-encoder-exception.filter';
 import { MachineInfoModule } from './machine-info/machine-info.module';
 import { ProgramInfoModule } from './program-info/program-info.module';
+import { ShopManagementModule } from './shop-management/shop-management.module';
 
 @Module({
     imports: [
@@ -43,6 +44,7 @@ import { ProgramInfoModule } from './program-info/program-info.module';
         ShopInfoModule,
         MachineInfoModule,
         ProgramInfoModule,
+        ShopManagementModule,
     ],
     controllers: [AppController],
     providers: [
