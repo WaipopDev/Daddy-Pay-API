@@ -47,9 +47,9 @@ export class LanguageController {
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @HttpCode(HttpStatus.OK)
-    @Get('all')
-    findAll() {
-        return this.languageService.findAll();
+    @Get('list')
+    findList() {
+        return this.languageService.findList();
     }
 
     @Get(':id')

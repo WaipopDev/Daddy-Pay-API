@@ -53,7 +53,6 @@ export class ShopManagementController {
         @User() userId: number,
         @Body() createShopManagementDto: CreateShopManagementDto
     ): Promise<ResponseShopManagementDto> {
-        console.log('createShopManagementDto', createShopManagementDto)
         return await this.shopManagementService.create(createShopManagementDto, userId);
     }
 

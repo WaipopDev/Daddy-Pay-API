@@ -3,9 +3,13 @@ import { EntityManager } from 'typeorm';
 import { LangMainEntity } from 'src/models/entities/LangMain.entity';
 import { LangListEntity } from 'src/models/entities/LangList.entity';
 import { ResponseLanguageDto } from 'src/language/dto/language.dto';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 export class LanguageRepository {
-   constructor(@InjectEntityManager() private readonly db: EntityManager) { }
+   constructor(
+      @InjectEntityManager() private readonly db: EntityManager,
+      private readonly firebaseService: FirebaseService
+   ) { }
 
    private get repoMain() {
       return this.db.getRepository(LangMainEntity);
@@ -14,29 +18,35 @@ export class LanguageRepository {
       return this.db.getRepository(LangListEntity);
    }
 
-   async findAll(): Promise<LangMainEntity[]> {
-      return this.repoMain.find({
-         where: { active: true },
-         order: { langCode: 'ASC' },
-      });
+   async findList() {
+      const database = this.firebaseService.getDatabase();
+        const ref = database.ref(`LanguageList`);
+         const snapshot = await ref.once('value');
+         
+         if (!snapshot.exists()) {
+            return null;
+         }
+         
+         const data = snapshot.val();
+         return data
    }
 
-   async findByCode(code: string): Promise<ResponseLanguageDto[] | null> {
-      // return this.repoMain.find({
-      //    where: { langCode: code },
-      //    relations: ['langLists'], // ตรงกับชื่อ property @OneToMany
-      // });
-      return this.repoMain
-         .createQueryBuilder('main')
-         .leftJoinAndSelect('main.langLists', 'list')
-         .where('main.langCode = :code', { code })
-         .select([
-            'list.langKey AS "langKey"',
-            'list.langName AS "langName"',
-         ])
-         .orderBy('list.langKey', 'ASC')
-         .getRawMany();
-      // return this.repoMain.findOneBy({ langCode: code });
+   async findByCode(code: string) {
+      try {
+         const database = this.firebaseService.getDatabase();
+         const ref = database.ref(`Language/${code.toUpperCase()}`);
+         const snapshot = await ref.once('value');
+         
+         if (!snapshot.exists()) {
+            return null;
+         }
+         
+         const data = snapshot.val();
+         return data;
+      } catch (error) {
+         console.error('Error fetching data from Firebase:', error);
+         return null;
+      }
    }
 
    async findById(id: number): Promise<LangMainEntity | null> {

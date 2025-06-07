@@ -79,8 +79,7 @@ export class ProgramInfoService {
     };
   }
 
-  async findOne(encodedId: string): Promise<ResponseProgramInfoDto> {
-    const id = IdEncoderService.decode(encodedId);
+  async findOne(id: number): Promise<ResponseProgramInfoDto> {
     const programInfo = await this.programInfoRepository.findProgramInfoById(id);
     
     if (!programInfo) {

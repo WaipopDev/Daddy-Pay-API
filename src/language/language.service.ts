@@ -36,16 +36,12 @@ export class LanguageService {
     }
 
    async findByCode(langCode: string) : Promise<{ [key: string]: string }> {
-        const response = await this.languageRepository.findByCode(langCode);
-        let data = {}
-        response?.map((item: ResponseLanguageDto) => {
-            data[item.langKey] = item.langName
-        })
-        return data
+       return await this.languageRepository.findByCode(langCode);
+
     }
 
-   async findAll(): Promise<LangMainEntity[]> {
-      return  await this.languageRepository.findAll()
+   async findList(){
+      return  await this.languageRepository.findList()
     }
 
     findOne(id: number) {

@@ -1,16 +1,42 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import * as serviceAccount from '../../firebase-key.json';
 
 @Injectable()
 export class FirebaseService implements OnModuleInit {
     private firebaseApp: admin.app.App;
 
     onModuleInit() {
-        this.firebaseApp = admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-            storageBucket: process.env.FIREBASE_STORAGE_BUCKET 
-        });
+        // วิธีที่ 1: ใช้ environment variables (แนะนำ)
+        if (process.env.FIREBASE_PRIVATE_KEY) {
+            const serviceAccount = {
+                type: 'service_account',
+                project_id: process.env.FIREBASE_PROJECT_ID,
+                private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+                private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+                client_email: process.env.FIREBASE_CLIENT_EMAIL,
+                client_id: process.env.FIREBASE_CLIENT_ID,
+                auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+                token_uri: 'https://oauth2.googleapis.com/token',
+                auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+                client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
+            };
+
+            this.firebaseApp = admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+                storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+                databaseURL: process.env.FIREBASE_DATABASE_URL
+            });
+        } else {
+            // วิธีที่ 2: ใช้ JSON file (fallback)
+            const serviceAccount = require('../../firebase-key.json');
+            const serviceAccountCopy = JSON.parse(JSON.stringify(serviceAccount));
+            
+            this.firebaseApp = admin.initializeApp({
+                credential: admin.credential.cert(serviceAccountCopy as admin.ServiceAccount),
+                storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+                databaseURL: process.env.FIREBASE_DATABASE_URL
+            });
+        }
     }
 
     getFirestore(): admin.firestore.Firestore {
@@ -23,6 +49,11 @@ export class FirebaseService implements OnModuleInit {
 
     getStorage(): admin.storage.Storage {
         return admin.storage(this.firebaseApp);
+    }
+
+    // เพิ่ม method สำหรับ Realtime Database
+    getDatabase(): admin.database.Database {
+        return admin.database(this.firebaseApp);
     }
 
     async uploadFile(buffer: Buffer, fileName: string, folder: string = 'shop-files'): Promise<string> {

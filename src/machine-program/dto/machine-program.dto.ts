@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Expose, Transform, Type } from 'class-transformer';
 import {
     IsArray,
     IsBoolean,
@@ -11,7 +12,10 @@ import {
     IsOptional,
     IsString,
     MaxLength,
+    IsDecimal,
+    IsPositive,
   } from 'class-validator';
+import { EncodeId } from "src/utility/id-encoder.decorators";
 
 export class ProgramMachineDTO {
     @ApiProperty({ description: 'Program ID' })
@@ -142,4 +146,163 @@ export class MachineDTO {
     @ApiProperty({ description: 'Time', })
     @IsNumber()
     time: number;
+}
+
+export class ResponseMachineInfoDto {
+    @ApiProperty({ description: 'Machine ID (encoded)' })
+    @Expose()
+    @Transform(({ value }) => value) // Will be encoded by the service
+    id: string;
+
+    @ApiProperty({ description: 'Machine unique key' })
+    @Expose()
+    machineKey: string;
+
+    @ApiProperty({ description: 'Machine type' })
+    @Expose()
+    machineType: string;
+
+    @ApiProperty({ description: 'Machine brand' })
+    @Expose()
+    machineBrand: string;
+
+    @ApiProperty({ description: 'Machine model' })
+    @Expose()
+    machineModel: string;
+}
+
+export class ResponseProgramInfoDto {
+    @ApiProperty({ description: 'Program ID (encoded)' })
+    @Expose()
+    @Transform(({ value }) => value) // Will be encoded by the service
+    id: string;
+
+    @ApiProperty({ description: 'Program unique key' })
+    @Expose()
+    programKey: string;
+
+    @ApiProperty({ description: 'Program name' })
+    @Expose()
+    programName: string;
+
+    @ApiPropertyOptional({ description: 'Program description' })
+    @Expose()
+    programDescription?: string;
+
+    @ApiProperty({ description: 'Created date' })
+    @Expose()
+    createdAt: Date;
+
+    @ApiProperty({ description: 'Updated date' })
+    @Expose()
+    updatedAt: Date;
+
+    @ApiProperty({ description: 'Machine information', type: ResponseMachineInfoDto })
+    @Expose()
+    @Type(() => ResponseMachineInfoDto)
+    machineInfo: ResponseMachineInfoDto;
+}
+
+export class MachineProgramResponseDto {
+    @ApiProperty({ description: 'Program ID (encoded)' })
+    @Expose()
+    @Transform(({ value }) => value) // Will be encoded by the service
+    id: string;
+
+    @ApiProperty({ description: 'Program unique key' })
+    @Expose()
+    programKey: string;
+
+    @ApiProperty({ description: 'Program name' })
+    @Expose()
+    programName: string;
+
+    @ApiPropertyOptional({ description: 'Program description' })
+    @Expose()
+    programDescription?: string;
+}
+
+
+export class ResponseShopInfoDto {
+    @ApiProperty({ description: 'Shop ID (encoded)' })
+    @Expose()
+    id: string;
+
+    @ApiProperty({ description: 'Shop unique key' })
+    @Expose()
+    shopKey: string;
+
+    @ApiProperty({ description: 'Shop name' })
+    @Expose()
+    shopName: string;
+
+    @ApiProperty({ description: 'Shop code' })
+    @Expose()
+    shopCode: string;
+}
+
+export class ResponseMachineProgramDto {
+    @ApiProperty({ description: 'Machine Program ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    id: string;
+
+    @ApiProperty({ description: 'Machine program unique key' })
+    @Expose()
+    machineProgramKey: string;
+
+    @ApiProperty({ description: 'Machine program price' })
+    @Expose()
+    machineProgramPrice: number;
+
+    @ApiProperty({ description: 'Machine program operation time in minutes' })
+    @Expose()
+    machineProgramOperationTime: number;
+
+    @ApiProperty({ description: 'Machine program status' })
+    @Expose()
+    machineProgramStatus: string;
+}
+
+export class ResponseProgramInfoByAllDto {
+    @ApiProperty({ description: 'Program ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    id: string;
+
+    @ApiProperty({ description: 'Program name' })
+    @Expose()
+    programName: string;
+
+    @ApiProperty({ description: 'Program description' })
+    @Expose()
+    programDescription: string;
+}
+export class ResponseMachineProgramAllDto {
+    @ApiProperty({ description: 'Machine Program ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    id: string;
+
+    @ApiProperty({ description: 'Machine program unique key' })
+    @Expose()
+    machineProgramKey: string;
+
+    @ApiProperty({ description: 'Machine program price' })
+    @Expose()
+    machineProgramPrice: number;
+
+    @ApiProperty({ description: 'Machine program operation time in minutes' })
+    @Expose()
+    machineProgramOperationTime: number;
+
+    @ApiProperty({ description: 'Machine program status' })
+    @Expose()
+    machineProgramStatus: string;
+
+    @ApiProperty({ description: 'Program information', type: ResponseProgramInfoByAllDto })
+    @Expose()
+    @Type(() => ResponseProgramInfoByAllDto)
+    programInfo: ResponseProgramInfoByAllDto;
+
 }
