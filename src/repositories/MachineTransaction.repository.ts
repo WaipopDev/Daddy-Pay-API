@@ -22,7 +22,6 @@ export class MachineTransactionRepository {
                 machineInfoId: true,
                 programInfoId: true,
                 machineProgramId: true,
-                shopManagementId: true,
                 priceType: true,
                 status: true,
                 transactionId: true,
@@ -58,23 +57,13 @@ export class MachineTransactionRepository {
                     machineProgramPrice: true,
                     machineProgramOperationTime: true,
                     machineProgramStatus: true,
-                },
-                shopManagement: {
-                    id: true,
-                    shopManagementKey: true,
-                    shopManagementName: true,
-                    shopManagementDescription: true,
-                    shopManagementMachineID: true,
-                    shopManagementIotID: true,
-                    shopManagementStatus: true,
                 }
             },
             relations: {
                 shopInfo: true,
                 machineInfo: true,
                 programInfo: true,
-                machineProgram: true,
-                shopManagement: true
+                machineProgram: true
             }
         });
     }
