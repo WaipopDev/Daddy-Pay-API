@@ -23,6 +23,7 @@ import { IdEncoderExceptionFilter } from './filters/id-encoder-exception.filter'
 import { MachineInfoModule } from './machine-info/machine-info.module';
 import { ProgramInfoModule } from './program-info/program-info.module';
 import { ShopManagementModule } from './shop-management/shop-management.module';
+import { IotProgramModule } from './iot-program/iot-program.module';
 
 @Module({
     imports: [
@@ -32,6 +33,8 @@ import { ShopManagementModule } from './shop-management/shop-management.module';
         }),
         DADDY_PAY_DB,
         AuthModule,
+        IotProgramModule,
+        
         MachineModule,
         MachineProgramModule,
         MachineTransactionModule,

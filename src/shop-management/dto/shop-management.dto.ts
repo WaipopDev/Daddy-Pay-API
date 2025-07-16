@@ -83,6 +83,59 @@ export class ResponseProgramInfoDto {
     programDescription?: string;
 }
 
+export class ResponseMachineProgramDto {
+    @ApiProperty({ description: 'Machine Program ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    id: number;
+
+    @ApiProperty({ description: 'Machine program unique key' })
+    @Expose()
+    machineProgramKey: string;
+
+    @ApiProperty({ description: 'Machine program price', type: 'number' })
+    @Expose()
+    machineProgramPrice: number;
+
+    @ApiProperty({ description: 'Machine program operation time (seconds)' })
+    @Expose()
+    machineProgramOperationTime: number;
+
+    @ApiProperty({ description: 'Machine program status' })
+    @Expose()
+    machineProgramStatus: string;
+
+    @ApiProperty({ description: 'Shop info ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    shopInfoId: number;
+
+    @ApiProperty({ description: 'Machine info ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    machineInfoId: number;
+
+    @ApiProperty({ description: 'Program info ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    programInfoId: number;
+
+    @ApiProperty({ description: 'Shop information', type: ResponseShopInfoDto })
+    @Expose()
+    @Type(() => ResponseShopInfoDto)
+    shopInfo: ResponseShopInfoDto;
+
+    @ApiProperty({ description: 'Machine information', type: ResponseMachineInfoDto })
+    @Expose()
+    @Type(() => ResponseMachineInfoDto)
+    machineInfo: ResponseMachineInfoDto;
+
+    @ApiProperty({ description: 'Program information', type: ResponseProgramInfoDto })
+    @Expose()
+    @Type(() => ResponseProgramInfoDto)
+    programInfo: ResponseProgramInfoDto;
+}
+
 export class ResponseShopManagementDto {
     @ApiProperty({ description: 'Shop Management ID (encoded)' })
     @Expose()

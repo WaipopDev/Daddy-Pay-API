@@ -143,11 +143,7 @@ export class AdminAuthService {
         }
     }
 
-    /**
-     * สร้าง token ใหม่สำหรับ user ที่มีอยู่
-     * @param userId ID ของ user
-     * @returns token ใหม่
-     */
+
     async refreshTokenByUserId(userId: number): Promise<string> {
         const user = await this.getUserById(userId);
         if (!user) {

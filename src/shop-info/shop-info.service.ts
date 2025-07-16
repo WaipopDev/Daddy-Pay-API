@@ -26,21 +26,7 @@ export class ShopInfoService {
         }
         // Upload file to Firebase Storage if provided
         if (file) {
-            try {
-                // Validate file
-                FileValidationService.validateFile(file, {
-                    maxSize: 10 * 1024 * 1024, // 10MB
-                    allowedTypes: ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-                    allowedExtensions: ['.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx']
-                });
-
-                const fileName = FileValidationService.generateUniqueFileName(file.originalname, 'shop');
-                const fileUrl = await this.firebaseService.uploadFile(file.buffer, fileName, 'shop-files');
-                createShopInfoDto.shopUploadFile = fileUrl;
-            } catch (error) {
-                console.error('Error uploading file to Firebase:', error);
-                throw new UnauthorizedException(error.message || 'Failed to upload file');
-            }
+            createShopInfoDto.shopUploadFile = await this.fileUploadToFirebase(file);
         }
         
         const id = await this.shopInfoRepository.create({
@@ -98,7 +84,10 @@ export class ShopInfoService {
         });
     }
 
-    async update(id: number, updateShopInfoDto: UpdateShopInfoDto): Promise<void> {
+    async update(id: number, updateShopInfoDto: UpdateShopInfoDto, file?: Express.Multer.File): Promise<void> {
+        if (file) {
+            updateShopInfoDto.shopUploadFile = await this.fileUploadToFirebase(file);
+        }
         await this.shopInfoRepository.update(id, {
             ...updateShopInfoDto,
             updatedBy: 1, // TODO: Get from authenticated user
@@ -139,5 +128,23 @@ export class ShopInfoService {
         }
 
         return shopKey;
+    }
+
+    private async fileUploadToFirebase(file: Express.Multer.File): Promise<string> {
+          try {
+                // Validate file
+                FileValidationService.validateFile(file, {
+                    maxSize: 10 * 1024 * 1024, // 10MB
+                    allowedTypes: ['image/jpeg', 'image/png', 'image/jpg'],
+                    allowedExtensions: ['.jpg', '.jpeg', '.png']
+                });
+
+                const fileName = FileValidationService.generateUniqueFileName(file.originalname, 'shop');
+                const fileUrl = await this.firebaseService.uploadFile(file.buffer, fileName, 'shop-files');
+                return fileUrl;
+            } catch (error) {
+                console.error('Error uploading file to Firebase:', error);
+                throw new UnauthorizedException(error.message || 'Failed to upload file');
+            }
     }
 }

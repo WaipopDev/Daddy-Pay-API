@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, UseInterceptors, UploadedFile, Query, BadRequestException, ClassSerializerInterceptor } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, UseInterceptors, UploadedFile, Query, BadRequestException, ClassSerializerInterceptor, UnauthorizedException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ShopInfoService } from './shop-info.service';
 import { CreateShopInfoDto } from './dto/create-shop-info.dto';
@@ -101,7 +101,7 @@ export class ShopInfoController {
             const id = IdEncoderService.decode(encodedId);
             return this.shopInfoService.findOne(id);
         } catch (error) {
-            throw new BadRequestException('Invalid shop ID format');
+            throw new UnauthorizedException('Invalid shop ID format');
         }
     }
 
@@ -109,16 +109,26 @@ export class ShopInfoController {
         summary: 'อัพเดทข้อมูลร้านค้า', 
         description: 'API สำหรับอัพเดทข้อมูลร้านค้าตาม ID ที่เข้ารหัสแล้ว' 
     })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        description: 'Shop information with file upload',
+        type: UpdateShopInfoDto,
+    })
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
     @Patch(':id')
-    async update(@Param('id') encodedId: string, @Body() updateShopInfoDto: UpdateShopInfoDto) {
+    @UseInterceptors(FileInterceptor('shopUploadFile'))
+    async update(
+        @Param('id') encodedId: string, 
+        @Body() updateShopInfoDto: UpdateShopInfoDto,
+        @UploadedFile() file: Express.Multer.File
+    ){
         try {
             const id = IdEncoderService.decode(encodedId);
-            return this.shopInfoService.update(id, updateShopInfoDto);
+            return this.shopInfoService.update(id, updateShopInfoDto, file);
         } catch (error) {
-            throw new BadRequestException('Invalid shop ID format');
+            throw new UnauthorizedException('Invalid shop ID format');
         }
     }
 
@@ -135,7 +145,7 @@ export class ShopInfoController {
             const id = IdEncoderService.decode(encodedId);
             return this.shopInfoService.remove(id);
         } catch (error) {
-            throw new BadRequestException('Invalid shop ID format');
+            throw new UnauthorizedException('Invalid shop ID format');
         }
     }
 }

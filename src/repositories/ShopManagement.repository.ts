@@ -1,17 +1,22 @@
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, FindOptionsWhere, IsNull } from 'typeorm';
+import { EntityManager, FindOptionsWhere, IsNull, Like } from 'typeorm';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate';
 
 import { ShopManagementEntity } from 'src/models/entities/ShopManagement.entity';
-import { ResponseShopManagementListDto, SortDto } from '../shop-management/dto/shop-management.dto';
+import { ResponseShopManagementListDto, SortDto, ResponseMachineProgramDto } from '../shop-management/dto/shop-management.dto';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
+import { MachineProgramEntity } from 'src/models/entities/MachineProgram.entity';
 
 export class ShopManagementRepository {
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
     
     private get repo() {
         return this.db.getRepository(ShopManagementEntity);
+    }
+
+    private get repoMachineProgram() {
+        return this.db.getRepository(MachineProgramEntity);
     }
 
     private async findOneShopManagement(where: FindOptionsWhere<ShopManagementEntity>) {
@@ -121,8 +126,98 @@ export class ShopManagementRepository {
     async findById(id: number): Promise<ShopManagementEntity | null> {
         return this.repo.findOne({ 
             where: { id, deletedAt: IsNull() },
+            relations: ['shopInfo', 'machineInfo']
+        });
+    }
+
+    async findByIdIoT(idIoT: string): Promise<ShopManagementEntity | null> {
+
+        return this.repo.findOne({
+            where: {
+                shopManagementIotID: Like(`%${idIoT}%`),
+                deletedAt: IsNull()
+            },
+            select:{
+                id: true,
+                shopManagementKey: true,
+                shopManagementName: true,
+                shopManagementDescription: true,
+                shopManagementMachineID: true,
+                shopManagementIotID: true,
+                shopManagementStatus: true,
+                shopManagementStatusOnline: true,
+                shopManagementIntervalTime: true,
+                shopInfoID: true,
+                machineInfoID: true,
+
+            }
+        });
+        
+    }
+
+    async findProgramByIdIoT(idIoT: string): Promise<ResponseMachineProgramDto[]> {
+
+        const shopManagement = await this.repo.findOne({
+            where: {
+                shopManagementIotID: Like(`%${idIoT}%`),
+                deletedAt: IsNull()
+            },
+            select:{
+                id: true,
+                shopManagementKey: true,
+                shopManagementName: true,
+                shopManagementDescription: true,
+                shopManagementMachineID: true,
+                shopManagementIotID: true,
+                shopManagementStatus: true,
+                shopManagementStatusOnline: true,
+                shopManagementIntervalTime: true,
+                shopInfoID: true,
+                machineInfoID: true,
+
+            }
+        });
+        if (!shopManagement) {
+            return [];
+        }
+        return await this.repoMachineProgram.find({
+            where: {
+                machineInfoId: shopManagement.machineInfoID,
+                machineProgramStatus: 'active',
+                deletedAt: IsNull()
+            },
+            select: {
+                id: true,
+                machineProgramKey: true,
+                machineProgramPrice: true,
+                machineProgramOperationTime: true,
+                machineProgramStatus: true,
+                shopInfoId: true,
+                machineInfoId: true,
+                programInfoId: true,
+                shopInfo: {
+                    id: true,
+                    shopKey: true,
+                    shopName: true,
+                    shopCode: true,
+                },
+                machineInfo: {
+                    id: true,
+                    machineKey: true,
+                    machineType: true,
+                    machineBrand: true,
+                    machineModel: true,
+                },
+                programInfo: {
+                    id: true,
+                    programKey: true,
+                    programName: true,
+                    programDescription: true,
+                }
+            },
             relations: ['shopInfo', 'machineInfo', 'programInfo']
         });
+        
     }
 
     async createShopManagement(data: Partial<ShopManagementEntity>): Promise<ShopManagementEntity> {
