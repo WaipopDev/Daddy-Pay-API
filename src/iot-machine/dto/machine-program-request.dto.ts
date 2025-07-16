@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 
 export class MachineProgramRequestDto {
     @ApiProperty({ 
@@ -31,6 +31,7 @@ export class MachineProgramRequestDto {
         example: 'coin',
         enum: ['coin', 'point', 'prompt_pay', 'member_card', 'force']
     })
+    @IsEnum(['coin', 'point', 'prompt_pay', 'member_card', 'force'])
     @IsString()
     @IsNotEmpty()
     priceType: string;
@@ -40,6 +41,7 @@ export class MachineProgramRequestDto {
         example: 'standby',
         enum: ['active', 'standby', 'error']
     })
+    @IsEnum(['active', 'standby', 'error'])
     @IsString()
     @IsNotEmpty()
     status: string;
