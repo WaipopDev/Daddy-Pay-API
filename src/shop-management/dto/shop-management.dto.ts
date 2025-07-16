@@ -105,6 +105,10 @@ export class ResponseMachineProgramDto {
     @Expose()
     machineProgramStatus: string;
 
+    @ApiProperty({ description: 'Status', example: 'active' })
+    @Expose()
+    status: string;
+
     @ApiProperty({ description: 'Shop info ID (encoded)' })
     @Expose()
     @EncodeId()

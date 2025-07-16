@@ -43,4 +43,13 @@ export class ShopManagementEntity extends DefaultEntity{
     @JoinColumn({ name: 'machine_info_id' })
     machineInfo: MachineInfoEntity;
 
+    @Column({ name: 'status', type: 'varchar', length: 50, default: 'standby' })
+    status: string;
+
+    @Column({ name: 'error_message', type: 'text', nullable: true })
+    errorMessage?: string;
+
+    @Column({ name: 'last_connect', type: 'timestamp', nullable: true })
+    lastConnect?: Date;
+
 }

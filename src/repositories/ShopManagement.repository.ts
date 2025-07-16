@@ -149,6 +149,9 @@ export class ShopManagementRepository {
                 shopManagementIntervalTime: true,
                 shopInfoID: true,
                 machineInfoID: true,
+                status: true,
+                errorMessage: true,
+                lastConnect: true,
 
             }
         });

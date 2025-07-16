@@ -106,4 +106,10 @@ export class MachineProgramRepository {
 
         return machineProgramKey;
     }
+
+    async findByIdAndKey(id: number, machineProgramKey: string): Promise<MachineProgramEntity | null> {
+        return this.repo.findOne({
+            where: { id, machineProgramKey, deletedAt: IsNull() }
+        });
+    }
 }

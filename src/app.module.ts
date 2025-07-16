@@ -24,6 +24,7 @@ import { MachineInfoModule } from './machine-info/machine-info.module';
 import { ProgramInfoModule } from './program-info/program-info.module';
 import { ShopManagementModule } from './shop-management/shop-management.module';
 import { IotProgramModule } from './iot-program/iot-program.module';
+import { IotMachineModule } from './iot-machine/iot-machine.module';
 
 @Module({
     imports: [
@@ -34,6 +35,7 @@ import { IotProgramModule } from './iot-program/iot-program.module';
         DADDY_PAY_DB,
         AuthModule,
         IotProgramModule,
+        IotMachineModule,
         
         MachineModule,
         MachineProgramModule,
