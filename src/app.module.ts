@@ -25,6 +25,7 @@ import { ProgramInfoModule } from './program-info/program-info.module';
 import { ShopManagementModule } from './shop-management/shop-management.module';
 import { IotProgramModule } from './iot-program/iot-program.module';
 import { IotMachineModule } from './iot-machine/iot-machine.module';
+import { IotPaymentModule } from './iot-payment/iot-payment.module';
 
 @Module({
     imports: [
@@ -36,6 +37,7 @@ import { IotMachineModule } from './iot-machine/iot-machine.module';
         AuthModule,
         IotProgramModule,
         IotMachineModule,
+        IotPaymentModule,
         
         MachineModule,
         MachineProgramModule,
