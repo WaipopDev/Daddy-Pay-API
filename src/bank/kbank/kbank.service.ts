@@ -213,4 +213,26 @@ export class KbankService {
         }
     }
 
+    async checkPayment(data: { ref1: string, ref2: string }): Promise<{
+        transactionId: string;
+        status: string;
+        amount: number;
+        reference1: string;
+        reference2: string;
+    } | null> {
+        const firestore = this.firebaseService.getFirestore();
+        const docRef = firestore.collection(KB_CALLBACK);
+        const doc = await docRef.where('reference1', '==', data.ref1).where('reference2', '==', data.ref2).get();
+        if (doc.empty) {
+            return null;
+        }
+        return {
+            transactionId: doc.docs[0].data().transactionId,
+            status: doc.docs[0].data().status,
+            amount: doc.docs[0].data().amount,
+            reference1: doc.docs[0].data().reference1,
+            reference2: doc.docs[0].data().reference2,
+        };
+    }
+
 }

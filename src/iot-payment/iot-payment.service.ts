@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { KB_CALLBACK } from 'src/constants/collection-firebase';
 import { FirebaseService } from 'src/firebase/firebase.service';
-import { IotPaymentQRPaymentRequestDto } from './dto/iot-payment.dto';
+import { IotPaymentCheckPaymentRequestDto, IotPaymentQRPaymentRequestDto } from './dto/iot-payment.dto';
 import { KbankService } from 'src/bank/kbank/kbank.service';
 import { MachineProgramRepository } from 'src/repositories/MachineProgram.repository';
 import { ShopManagementRepository } from 'src/repositories/ShopManagement.repository';
@@ -44,6 +44,11 @@ export class IotPaymentService {
             ref1: data.ref1,
             ref2: data.ref2,
         };
+    }
+
+    async checkPayment(query: IotPaymentCheckPaymentRequestDto) {
+        const response = await this.kbankService.checkPayment(query);
+        return response;
     }
     // async getTransactionBankId(transactionId: string): Promise<string> {
     //     const firestore = this.firebaseService.getFirestore();

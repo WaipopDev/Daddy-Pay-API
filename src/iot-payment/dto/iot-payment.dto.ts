@@ -73,3 +73,23 @@ export class IotPaymentQRPaymentRequestDto {
     @IsNotEmpty()
     id: number;
 }
+
+export class IotPaymentCheckPaymentRequestDto {
+    @ApiProperty({ 
+        description: 'Ref1',
+        example: 'xxx',
+        required: true
+    })
+    @IsString()
+    @IsNotEmpty()
+    ref1: string;
+
+    @ApiProperty({ 
+        description: 'Ref2',
+        example: 'xxx',
+        required: true
+    })
+    @IsString()
+    @IsNotEmpty()
+    ref2: string;
+}
