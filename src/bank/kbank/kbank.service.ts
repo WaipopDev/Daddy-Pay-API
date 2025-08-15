@@ -103,6 +103,8 @@ export class KbankService {
     async createHttpsAgent() {
         const keyPath = this.configService.get('KEY_PATH');
         const certPath = this.configService.get('CERT_PATH');
+        console.log('keyPath', keyPath)
+        console.log('certPath', certPath)
         const key = fs.readFileSync(keyPath);
         const cert = fs.readFileSync(certPath);
         return {
