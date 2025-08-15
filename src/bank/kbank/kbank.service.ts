@@ -103,8 +103,7 @@ export class KbankService {
     async createHttpsAgent() {
         const keyPath = this.configService.get('KEY_PATH');
         const certPath = this.configService.get('CERT_PATH');
-        console.log('keyPath', keyPath)
-        console.log('certPath', certPath)
+   
         const key = fs.readFileSync(keyPath);
         const cert = fs.readFileSync(certPath);
         return {
@@ -226,7 +225,13 @@ export class KbankService {
         const docRef = firestore.collection(KB_CALLBACK);
         const doc = await docRef.where('reference1', '==', data.ref1).where('reference2', '==', data.ref2).get();
         if (doc.empty) {
-            return null;
+            return {
+                transactionId: '',
+                status: '',
+                amount: 0,
+                reference1: '',
+                reference2: '',
+            };
         }
         return {
             transactionId: doc.docs[0].data().transactionId,
