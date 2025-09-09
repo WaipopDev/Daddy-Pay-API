@@ -158,7 +158,7 @@ export class ShopManagementRepository {
         
     }
 
-    async findProgramByIdIoT(idIoT: string): Promise<ResponseMachineProgramDto[]> {
+    async findProgramByIdIoT(idIoT: string): Promise<{machineProgram: ResponseMachineProgramDto[], shopManagement: ShopManagementEntity | null}> {
 
         const shopManagement = await this.repo.findOne({
             where: {
@@ -181,9 +181,9 @@ export class ShopManagementRepository {
             }
         });
         if (!shopManagement) {
-            return [];
+            return {machineProgram: [], shopManagement: null};
         }
-        return await this.repoMachineProgram.find({
+        const machineProgram = await this.repoMachineProgram.find({
             where: {
                 machineInfoId: shopManagement.machineInfoID,
                 machineProgramStatus: 'active',
@@ -220,7 +220,7 @@ export class ShopManagementRepository {
             },
             relations: ['shopInfo', 'machineInfo', 'programInfo']
         });
-        
+        return {machineProgram, shopManagement};
     }
 
     async createShopManagement(data: Partial<ShopManagementEntity>): Promise<ShopManagementEntity> {

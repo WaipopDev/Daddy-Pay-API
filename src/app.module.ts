@@ -26,6 +26,7 @@ import { ShopManagementModule } from './shop-management/shop-management.module';
 import { IotProgramModule } from './iot-program/iot-program.module';
 import { IotMachineModule } from './iot-machine/iot-machine.module';
 import { IotPaymentModule } from './iot-payment/iot-payment.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
     imports: [
@@ -52,6 +53,7 @@ import { IotPaymentModule } from './iot-payment/iot-payment.module';
         MachineInfoModule,
         ProgramInfoModule,
         ShopManagementModule,
+        ReportModule,
     ],
     controllers: [AppController],
     providers: [
