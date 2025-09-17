@@ -148,10 +148,10 @@ export class ReportRepository {
         if(branchId){
             const branchIdDecode = IdEncoderService.decode(branchId);
             // const branchData = await this.repoShopManagement.findOne({ where: { shopInfoID: Number(branchIdDecode) } });
-            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).where('reference4', '==', `${branchIdDecode}`).orderBy('createdAt', 'asc').get();
+            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).where('reference4', '==', `${branchIdDecode}`).orderBy('createdAt', 'desc').get();
             docData = doc.docs;
         }else{
-            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).orderBy('createdAt', 'asc').get();
+            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).orderBy('createdAt', 'desc').get();
             docData = doc.docs;
         }
         // console.log('branchData', branchData)
@@ -210,10 +210,10 @@ export class ReportRepository {
         let docData: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[] = [];
         if(branchId){
             const branchIdDecode = IdEncoderService.decode(branchId);
-            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).where('reference4', '==', `${branchIdDecode}`).orderBy('createdAt', 'asc').get();
+            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).where('reference4', '==', `${branchIdDecode}`).orderBy('createdAt', 'desc').get();
             docData = doc.docs;
         }else{
-            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).orderBy('createdAt', 'asc').get();
+            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).orderBy('createdAt', 'desc').get();
             docData = doc.docs;
         }
         return {totalPrice: docData.reduce((acc, curr) => acc + curr.data().txnAmount, 0)};
