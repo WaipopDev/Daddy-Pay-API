@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { IotPaymentService } from './iot-payment.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IoTAuthGuard } from 'src/guards/AuthIoT.guard';
@@ -23,7 +23,7 @@ export class IotPaymentController {
     @ApiOperation({ summary: 'Check Payment' })
     @ApiResponse({ status: 200, description: 'Check Payment' })
     @ApiResponse({ status: 400, description: 'Bad Request' })
-    async checkPayment(@Query() query: IotPaymentCheckPaymentRequestDto) {
+    async checkPayment(@Body() query: IotPaymentCheckPaymentRequestDto) {
         return this.iotPaymentService.checkPayment(query);
     }
 }

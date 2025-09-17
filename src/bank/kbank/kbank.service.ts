@@ -227,7 +227,7 @@ export class KbankService {
         if (doc.empty) {
             return {
                 transactionId: '',
-                status: 'error',
+                status: 'failed',
                 amount: 0,
                 reference1: '',
                 reference2: '',
