@@ -2,7 +2,7 @@ import { Controller, Get, UseGuards, UseInterceptors, ClassSerializerInterceptor
 import { ReportService } from './report.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
-import { ReportBranchIncomeDto } from './dto/report.dto';
+import { ReportBranchIncomeDto, ReportKbankPaymentDto } from './dto/report.dto';
 
 @ApiTags('Report')
 @ApiBearerAuth()
@@ -24,6 +24,24 @@ export class ReportController {
     @Get('branch-income-sum')
     sumBranchIncome(@Query() query: ReportBranchIncomeDto) {
         return this.reportService.sumBranchIncome(query);
+    }
+
+    @Get('kbank-payment')
+    kbankPayment(@Query() query: ReportKbankPaymentDto) {
+        try {
+            return this.reportService.kbankPayment(query);
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
+
+    @Get('kbank-payment-sum')
+    kbankPaymentSum(@Query() query: ReportKbankPaymentDto) {
+        try {
+            return this.reportService.kbankPaymentSum(query);
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
     }
 
 }

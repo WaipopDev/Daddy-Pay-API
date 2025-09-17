@@ -35,7 +35,7 @@ export class IotPaymentService {
             ref1: programInfo.machineProgramKey,
             ref2: `TRX${moment().unix()}`,
             ref3: shopManagement.shopManagementKey,
-            ref4: 'CODE001', // CODE001 = ระบบอัตโนมัติ
+            ref4: shopManagement.shopInfoID.toString(),
         }
         const response: { qrCode: string } = await this.kbankService.generateKbankQRPayment(data);
 

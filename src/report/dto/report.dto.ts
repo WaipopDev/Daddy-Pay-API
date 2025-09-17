@@ -8,7 +8,7 @@ export class ReportBranchIncomeDto {
     @ApiProperty({ description: 'Branch ID', required: false })
     @IsString()
     @IsOptional()
-    @Transform(({ value }) => value ? IdEncoderService.decode(value) : value)
+    // @Transform(({ value }) => value ? IdEncoderService.decode(value) : value)
     branchId: string;
 
     @ApiProperty({ description: 'Payment type', required: false })
@@ -100,4 +100,20 @@ export class ReportBranchIncomePaginationDto {
         totalPages: number;
         currentPage: number;
     };
+}
+
+export class ReportKbankPaymentDto {
+    @ApiProperty({ description: 'Branch ID', required: false })
+    @IsString()
+    @IsOptional()
+    // @Transform(({ value }) => value ? IdEncoderService.decode(value) : value)
+    branchId: string;
+
+    @ApiProperty({ description: 'Start date' , example: '2025-01-01', required: true })
+    @IsString()
+    startDate: string;
+
+    @ApiProperty({ description: 'End date' , example: '2025-01-01', required: true })
+    @IsString()
+    endDate: string;
 }
