@@ -227,18 +227,18 @@ export class KbankService {
         if (doc.empty) {
             return {
                 transactionId: '',
-                status: '',
+                status: 'error',
                 amount: 0,
                 reference1: '',
                 reference2: '',
             };
         }
         return {
-            transactionId: doc.docs[0].data().transactionId,
-            status: doc.docs[0].data().status,
-            amount: doc.docs[0].data().amount,
-            reference1: doc.docs[0].data().reference1,
-            reference2: doc.docs[0].data().reference2,
+            transactionId: doc.docs[0].data().txnNo || '',
+            status: 'success',
+            amount: doc.docs[0].data().txnAmount || 0,
+            reference1: doc.docs[0].data().reference1 || '',
+            reference2: doc.docs[0].data().reference2 || '',
         };
     }
 
