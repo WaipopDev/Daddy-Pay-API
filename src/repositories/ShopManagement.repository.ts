@@ -186,6 +186,7 @@ export class ShopManagementRepository {
         const machineProgram = await this.repoMachineProgram.find({
             where: {
                 machineInfoId: shopManagement.machineInfoID,
+                shopInfoId: shopManagement.shopInfoID,
                 machineProgramStatus: 'active',
                 deletedAt: IsNull()
             },
