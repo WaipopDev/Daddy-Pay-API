@@ -1,5 +1,6 @@
-import { Column, Entity } from "typeorm"
+import { Column, Entity, OneToMany } from "typeorm"
 import { DefaultEntity } from './default.entity';
+import { UsersPermissionsEntity } from "./UsersPermissions.entity";
 
 @Entity({ name: 'users' })
 export class UsersEntity extends DefaultEntity {
@@ -33,5 +34,8 @@ export class UsersEntity extends DefaultEntity {
 
     @Column({ type: 'date', name: 'subscribe_end_date', nullable: true })
     subscribeEndDate: Date | null;
+
+    @OneToMany(() => UsersPermissionsEntity, (permission) => permission.user)
+    permissions: UsersPermissionsEntity[];
 
 }

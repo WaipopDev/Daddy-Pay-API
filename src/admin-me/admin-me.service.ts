@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersRepository } from 'src/repositories/Users.repository';
+import { UsersPermissionsEntity } from 'src/models/entities/UsersPermissions.entity';
 
 @Injectable()
 export class AdminMeService {
@@ -8,8 +9,13 @@ export class AdminMeService {
     ) { }
     async getProfile(userId: number) {
         const user = await this.usersRepo.findUserById(userId);
+        
         if (!user) {
             throw new UnauthorizedException('User not found.');
+        }
+        let rolePermissions: UsersPermissionsEntity[] = [];
+        if(user.role === 'admin' || user.role === 'user'){
+            rolePermissions = await this.usersRepo.findRolePermissions(user.id);
         }
         return {
             id: user.id,
@@ -26,6 +32,7 @@ export class AdminMeService {
             updatedAt: user.updatedAt,
             createdBy: user.createdBy,
             updatedBy: user.updatedBy,
+            rolePermissions:rolePermissions
         };
     }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsOptional } from "class-validator";
+import { IsEnum, IsNumber, IsOptional } from "class-validator";
 import { ESort } from "src/constants/query.type";
 import { EncodeId } from "src/utility/id-encoder.decorators";
 
@@ -37,6 +37,10 @@ export class ResponseShopInfoDto {
     @ApiProperty({ description: 'รหัส (เข้ารหัสแล้ว)', type: 'string', example: 'eyJhbGciOiJIUzI1NiJ9' })
     @EncodeId()
     id: number;
+
+    @ApiProperty({ description: 'idKey', example: 1 })
+    @IsNumber()
+    idKey: number;
 
     @ApiProperty({ description: 'รหัสร้านค้า', example: 'shop_abc123' })
     shopKey: string;
