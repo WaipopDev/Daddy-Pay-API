@@ -116,7 +116,7 @@ export class UsersRepository {
                 user.password = await hashPassword(data.password);
                 user.role = data.role;
                 user.active = true;
-                user.isVerified = false;
+                user.isVerified = true;
                 user.isAdminLevel = 0;
                 user.subscribeStartDate = data.subscribeStartDate || null;
                 user.subscribeEndDate = data.subscribeEndDate || null;
