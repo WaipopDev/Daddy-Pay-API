@@ -216,8 +216,8 @@ export class UsersRepository {
                         userPermission.userId = id;
                         userPermission.shopId = Number(shopId);
                         userPermission.status = 'active';
-                        userPermission.createdBy = Number(data.createdBy);
-                        userPermission.updatedBy = Number(data.createdBy);
+                        userPermission.createdBy = Number(data.updatedBy);
+                        userPermission.updatedBy = Number(data.updatedBy);
                         return userPermission;
                     });
 

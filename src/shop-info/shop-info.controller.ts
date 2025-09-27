@@ -8,7 +8,7 @@ import { ApiBearerAuth, ApiResponse, ApiTags, ApiConsumes, ApiBody, ApiQuery, Ap
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { User } from 'src/decorators/user.decorator';
-import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto } from './dto/shoo-info.dto';
+import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
 import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { PaginationDto } from 'src/constants/pagination.constant';
@@ -88,6 +88,14 @@ export class ShopInfoController {
         return this.shopInfoService.findList();
     }
 
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200], type: ResponseShopInfoListUserDto, isArray: true })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @HttpCode(HttpStatus.OK)
+    @Get('list-user')
+    findListUser():Promise<ResponseShopInfoListUserDto[]> { 
+        return this.shopInfoService.findListUser();
+    }
+
     @ApiOperation({ 
         summary: 'ดึงข้อมูลร้านค้าตาม ID', 
         description: 'API สำหรับดึงข้อมูลร้านค้าตาม ID ที่เข้ารหัสแล้ว' 
@@ -105,6 +113,7 @@ export class ShopInfoController {
         }
     }
 
+    
     @ApiOperation({ 
         summary: 'อัพเดทข้อมูลร้านค้า', 
         description: 'API สำหรับอัพเดทข้อมูลร้านค้าตาม ID ที่เข้ารหัสแล้ว' 

@@ -6,7 +6,7 @@ import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { FileValidationService } from 'src/utility/file-validation.service';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
-import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto } from './dto/shoo-info.dto';
+import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { plainToInstance } from 'class-transformer';
@@ -67,6 +67,10 @@ export class ShopInfoService {
                 enableImplicitConversion: true 
             })
         );
+    }
+    async findListUser(): Promise<ResponseShopInfoListUserDto[]> {
+        const result = await this.shopInfoRepository.findList();
+        return result;
     }
 
     async findOne(id: number): Promise<ResponseShopInfoDto | null> {

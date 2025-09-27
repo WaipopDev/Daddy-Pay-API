@@ -33,6 +33,14 @@ export class ResponseShopInfoListDto {
     shopName: string;
 }
 
+export class ResponseShopInfoListUserDto {
+  @ApiProperty({ description: 'รหัส', type: 'number', example: 1 })
+  id: number;
+
+  @ApiProperty({ description: 'ชื่อร้านค้า' })
+  shopName: string;
+}
+
 export class ResponseShopInfoDto {
     @ApiProperty({ description: 'รหัส (เข้ารหัสแล้ว)', type: 'string', example: 'eyJhbGciOiJIUzI1NiJ9' })
     @EncodeId()
