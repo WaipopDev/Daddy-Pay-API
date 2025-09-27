@@ -28,6 +28,7 @@ import { IotMachineModule } from './iot-machine/iot-machine.module';
 import { IotPaymentModule } from './iot-payment/iot-payment.module';
 import { ReportModule } from './report/report.module';
 import { UserModule } from './user/user.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
     imports: [
@@ -56,6 +57,7 @@ import { UserModule } from './user/user.module';
         ShopManagementModule,
         ReportModule,
         UserModule,
+        DashboardModule,
     ],
     controllers: [AppController],
     providers: [

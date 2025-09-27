@@ -44,9 +44,20 @@ export class ReportRepository {
         const { startDate, endDate, page, limit } = query;
         const queryBuilder = this.repo.createQueryBuilder('machineTransaction');
 
+        // Validate and parse dates
+        if (!startDate || !endDate) {
+            throw new Error('startDate and endDate are required');
+        }
+
         const startOfDay = new Date(startDate);
-        startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(endDate);
+
+        // Check if dates are valid
+        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
+            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
+        }
+
+        startOfDay.setHours(0, 0, 0, 0);
         endOfDay.setHours(23, 59, 59, 999);
 
         queryBuilder.select([
@@ -104,9 +115,20 @@ export class ReportRepository {
         const { startDate, endDate } = query;
         const queryBuilder = this.repo.createQueryBuilder('machineTransaction');
         
+        // Validate and parse dates
+        if (!startDate || !endDate) {
+            throw new Error('startDate and endDate are required');
+        }
+
         const startOfDay = new Date(startDate);
-        startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(endDate);
+
+        // Check if dates are valid
+        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
+            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
+        }
+
+        startOfDay.setHours(0, 0, 0, 0);
         endOfDay.setHours(23, 59, 59, 999);
         
         queryBuilder.select('SUM(machineTransaction.price) as totalPrice');
@@ -142,13 +164,24 @@ export class ReportRepository {
     async kbankPayment(query: ReportKbankPaymentDto, permissions: number[]) {
         const { startDate, endDate, branchId } = query;
 
-        const firestore = this.firebaseService.getFirestore();
-        const docRef = firestore.collection(KB_CALLBACK);
+        // Validate and parse dates
+        if (!startDate || !endDate) {
+            throw new Error('startDate and endDate are required');
+        }
 
         const startOfDay = new Date(startDate);
-        startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(endDate);
+
+        // Check if dates are valid
+        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
+            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
+        }
+
+        startOfDay.setHours(0, 0, 0, 0);
         endOfDay.setHours(23, 59, 59, 999);
+
+        const firestore = this.firebaseService.getFirestore();
+        const docRef = firestore.collection(KB_CALLBACK);
 
         let docData: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[] = [];
         if(branchId){
@@ -215,13 +248,25 @@ export class ReportRepository {
 
     async kbankPaymentSum(query: ReportKbankPaymentDto, permissions: number[]) {
         const { startDate, endDate, branchId } = query;
-        const firestore = this.firebaseService.getFirestore();
-        const docRef = firestore.collection(KB_CALLBACK);
+        
+        // Validate and parse dates
+        if (!startDate || !endDate) {
+            throw new Error('startDate and endDate are required');
+        }
 
         const startOfDay = new Date(startDate);
-        startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(endDate);
+
+        // Check if dates are valid
+        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
+            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
+        }
+
+        startOfDay.setHours(0, 0, 0, 0);
         endOfDay.setHours(23, 59, 59, 999);
+
+        const firestore = this.firebaseService.getFirestore();
+        const docRef = firestore.collection(KB_CALLBACK);
         let docData: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[] = [];
         if(branchId){
             const branchIdDecode = IdEncoderService.decode(branchId);
