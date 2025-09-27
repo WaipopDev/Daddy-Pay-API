@@ -1,4 +1,4 @@
-import { ClassSerializerInterceptor, Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ClassSerializerInterceptor, Controller, Get, Param, UseGuards, UseInterceptors } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -25,5 +25,12 @@ export class DashboardController {
         @User() userId: number
     ): Promise<ResponseDashboardMachineDto> {
         return await this.dashboardService.getTotalMachine(userId);
+    }
+
+    @Get('graph-data/:branchId')
+    async getGraphData(
+        @Param('branchId') branchId: string
+     ) {
+        return await this.dashboardService.getGraphData(branchId);
     }
 }

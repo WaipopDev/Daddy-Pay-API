@@ -83,5 +83,59 @@ export class DashboardRepository {
         };
     }
 
+    async findAllGraphDataByDay(branchId: number) {
+        const startDate = moment.utc().subtract(1, 'day').startOf('day').toDate();
+        const endDate = moment.utc().endOf('day').toDate();
+        const graphDataByDay = this.repoTransaction.createQueryBuilder('machineTransaction')
+        graphDataByDay.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByDay.where('machineTransaction.deletedAt IS NULL')
+        graphDataByDay.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
+        graphDataByDay.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });
+        graphDataByDay.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endDate });
+        graphDataByDay.orderBy('machineTransaction.createdAt', 'DESC');
+        return await graphDataByDay.getRawMany();
+    
+    }
+
+    async findAllGraphDataByWeek(branchId: number) {
+        const startDate = moment.utc().subtract(1, 'week').startOf('week').toDate();
+        const endDate = moment.utc().endOf('week').toDate();
+        const graphDataByWeek = this.repoTransaction.createQueryBuilder('machineTransaction')
+        graphDataByWeek.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByWeek.where('machineTransaction.deletedAt IS NULL')
+        graphDataByWeek.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
+        graphDataByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });
+        graphDataByWeek.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endDate });
+        graphDataByWeek.orderBy('machineTransaction.createdAt', 'DESC');
+        return await graphDataByWeek.getRawMany();
+    }
+
+    async findAllGraphDataByMonth(branchId: number) {
+        const startDate = moment.utc().subtract(1, 'month').startOf('month').toDate();
+        const endDate = moment.utc().endOf('month').toDate();
+        const graphDataByMonth = this.repoTransaction.createQueryBuilder('machineTransaction')
+        graphDataByMonth.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByMonth.where('machineTransaction.deletedAt IS NULL')
+        graphDataByMonth.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
+        graphDataByMonth.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });
+        graphDataByMonth.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endDate });
+        graphDataByMonth.orderBy('machineTransaction.createdAt', 'DESC');
+        return await graphDataByMonth.getRawMany();
+    }
+
+    async findAllGraphDataByYear(branchId: number) {
+        const startDate = moment.utc().subtract(1, 'year').startOf('year').toDate();
+        const endDate = moment.utc().endOf('year').toDate();
+        const graphDataByYear = this.repoTransaction.createQueryBuilder('machineTransaction')
+        graphDataByYear.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByYear.where('machineTransaction.deletedAt IS NULL')
+        graphDataByYear.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
+        graphDataByYear.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });
+        graphDataByYear.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endDate });
+        graphDataByYear.orderBy('machineTransaction.createdAt', 'DESC');
+        return await graphDataByYear.getRawMany();
+    }
+
+   
 
 }
