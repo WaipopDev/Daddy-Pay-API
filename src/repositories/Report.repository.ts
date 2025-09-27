@@ -40,7 +40,7 @@ export class ReportRepository {
         return this.db.getRepository(MachineProgramEntity);
     }
 
-    async findBranchIncome(query: ReportBranchIncomeDto) {
+    async findBranchIncome(query: ReportBranchIncomeDto, permissions: number[]) {
         const { startDate, endDate, page, limit } = query;
         const queryBuilder = this.repo.createQueryBuilder('machineTransaction');
 
@@ -68,6 +68,9 @@ export class ReportRepository {
         queryBuilder.where('machineTransaction.deletedAt IS NULL');
         queryBuilder.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startOfDay });
         queryBuilder.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endOfDay });
+        if(permissions.length > 0){
+            queryBuilder.andWhere('machineTransaction.shopInfoId IN (:...permissions)', { permissions: permissions });
+        }
 
         if (query.branchId) {
             const branchId = IdEncoderService.decode(query.branchId);
@@ -97,7 +100,7 @@ export class ReportRepository {
         return paginate<MachineTransactionEntity>(queryBuilder, paginationOptions);
     }
 
-    async sumBranchIncome(query: ReportBranchIncomeDto) {
+    async sumBranchIncome(query: ReportBranchIncomeDto, permissions: number[]) {
         const { startDate, endDate } = query;
         const queryBuilder = this.repo.createQueryBuilder('machineTransaction');
         
@@ -122,6 +125,9 @@ export class ReportRepository {
         if (query.programName) {
             queryBuilder.andWhere('programInfo.programName LIKE :programName', { programName: `%${query.programName}%` });
         }
+        if(permissions.length > 0){
+            queryBuilder.andWhere('machineTransaction.shopInfoId IN (:...permissions)', { permissions: permissions });
+        }
 
         queryBuilder.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startOfDay });
         queryBuilder.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endOfDay });
@@ -133,7 +139,7 @@ export class ReportRepository {
         return queryBuilder.getRawOne();
     }
 
-    async kbankPayment(query: ReportKbankPaymentDto) {
+    async kbankPayment(query: ReportKbankPaymentDto, permissions: number[]) {
         const { startDate, endDate, branchId } = query;
 
         const firestore = this.firebaseService.getFirestore();
@@ -147,28 +153,36 @@ export class ReportRepository {
         let docData: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[] = [];
         if(branchId){
             const branchIdDecode = IdEncoderService.decode(branchId);
-            // const branchData = await this.repoShopManagement.findOne({ where: { shopInfoID: Number(branchIdDecode) } });
-            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).where('reference4', '==', `${branchIdDecode}`).orderBy('createdAt', 'desc').get();
-            docData = doc.docs;
+                const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).where('reference4', '==', `${branchIdDecode}`).orderBy('createdAt', 'desc').get();
+                docData = doc.docs;
+          
         }else{
-            const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).orderBy('createdAt', 'desc').get();
-            docData = doc.docs;
+                const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).orderBy('createdAt', 'desc').get();
+                docData = doc.docs;
         }
         // console.log('branchData', branchData)
         const defaultDataBranch: {shopManagementKey: string, shopManagementName: string, shopName: string}[] = []
         const defaultDataProgram: {machineProgramKey: string, programName: string, machineType: string}[] = []
-        return await Promise.all(docData.map(async (doc) => {
+  
+        const data = await Promise.all(docData.map(async (doc) => {
             let findDataBranch = defaultDataBranch.find(item => item.shopManagementKey === doc.data().reference3)
             let findDataProgram = defaultDataProgram.find(item => item.machineProgramKey === doc.data().reference1)
             if(!findDataBranch){
                 const branchData = await this.repoShopManagement.createQueryBuilder('shopManagement')
                 .select([
                     'shopManagement.shopManagementName', 
-                    'shopInfo.shopName'
+                    'shopInfo.shopName',
+                    'shopInfo.id'
                 ])
                 .innerJoin('shopManagement.shopInfo', 'shopInfo')
                 .where('shopManagement.shopManagementKey = :shopManagementKey', { shopManagementKey: doc.data().reference3 })
                 .getOne();
+                if(permissions.length > 0){
+                    const isPermission = permissions.find(item => item === branchData?.shopInfo.id)
+                    if(!isPermission){
+                        return null;
+                    }
+                }
                 defaultDataBranch.push({shopManagementKey: doc.data().reference3, shopManagementName: branchData?.shopManagementName || '', shopName: branchData?.shopInfo.shopName || ''})
                 findDataBranch = {shopManagementKey: doc.data().reference3, shopManagementName: branchData?.shopManagementName || '', shopName: branchData?.shopInfo.shopName || ''}
             }
@@ -196,9 +210,10 @@ export class ReportRepository {
                 machineType: findDataProgram?.machineType || '',
             };
         }));
+        return data.filter(item => item !== null);
     }
 
-    async kbankPaymentSum(query: ReportKbankPaymentDto) {
+    async kbankPaymentSum(query: ReportKbankPaymentDto, permissions: number[]) {
         const { startDate, endDate, branchId } = query;
         const firestore = this.firebaseService.getFirestore();
         const docRef = firestore.collection(KB_CALLBACK);
@@ -212,10 +227,35 @@ export class ReportRepository {
             const branchIdDecode = IdEncoderService.decode(branchId);
             const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).where('reference4', '==', `${branchIdDecode}`).orderBy('createdAt', 'desc').get();
             docData = doc.docs;
+            
         }else{
             const doc = await docRef.where('createdAt', '>=', startOfDay).where('createdAt', '<=', endOfDay).orderBy('createdAt', 'desc').get();
             docData = doc.docs;
         }
-        return {totalPrice: docData.reduce((acc, curr) => acc + curr.data().txnAmount, 0)};
+        const defaultDataBranch: {shopManagementKey: string}[] = []
+        const data = await Promise.all(docData.map(async (doc) => {
+            let findDataBranch = defaultDataBranch.find(item => item.shopManagementKey === doc.data().reference3)
+            if (!findDataBranch && permissions.length > 0) {
+                const branchData = await this.repoShopManagement.createQueryBuilder('shopManagement')
+                    .select([
+                        'shopManagement.shopManagementName',
+                        'shopInfo.shopName',
+                        'shopInfo.id'
+                    ])
+                    .innerJoin('shopManagement.shopInfo', 'shopInfo')
+                    .where('shopManagement.shopManagementKey = :shopManagementKey', { shopManagementKey: doc.data().reference3 })
+                    .andWhere('shopInfo.id IN (:...permissions)', { permissions: permissions })
+                    .getOne();
+                if(!branchData){
+                    return null;
+                }
+                defaultDataBranch.push({ shopManagementKey: doc.data().reference3})
+                
+            }
+            return doc.data().txnAmount
+        }));
+        const dataFilter = data.filter(item => item !== null);
+
+        return {totalPrice: dataFilter.reduce((acc, curr) => acc + curr, 0)};
     }
 }

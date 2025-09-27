@@ -84,8 +84,10 @@ export class ShopInfoController {
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @HttpCode(HttpStatus.OK)
     @Get('list')
-    findList():Promise<ResponseShopInfoListDto[]> {
-        return this.shopInfoService.findList();
+    findList(
+        @User() userId: number,
+    ):Promise<ResponseShopInfoListDto[]> {
+        return this.shopInfoService.findList(userId);
     }
 
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200], type: ResponseShopInfoListUserDto, isArray: true })

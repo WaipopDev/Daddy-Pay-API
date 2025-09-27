@@ -1,5 +1,5 @@
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, FindOptionsWhere, IsNull } from 'typeorm';
+import { EntityManager, FindOptionsWhere, In, IsNull } from 'typeorm';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate';
 
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
@@ -169,14 +169,28 @@ export class ShopInfoRepository {
         return count > 0;
     }
 
-    async findList(): Promise<ResponseShopInfoListDto[]> {
-        return this.repo.find({
-            where: { shopStatus: 'active', deletedAt: IsNull() },
-            order: { shopName: 'ASC' },
+
+    async findList(permissions: number[] = []): Promise<ResponseShopInfoListDto[]> {
+        const baseQuery = {
+            order: { shopName: 'ASC' as const },
             select: {
                 id: true,
                 shopName: true,
             },
+        };
+        
+        const whereClause: FindOptionsWhere<ShopInfoEntity> = {
+            shopStatus: 'active',
+            deletedAt: IsNull(),
+        };
+        
+        if (permissions.length > 0) {
+            whereClause.id = In(permissions);
+        }
+        
+        return this.repo.find({
+            ...baseQuery,
+            where: whereClause,
         });
     }
 

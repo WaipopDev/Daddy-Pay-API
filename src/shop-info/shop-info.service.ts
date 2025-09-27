@@ -10,12 +10,14 @@ import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, Respons
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { plainToInstance } from 'class-transformer';
+import { UsersRepository } from 'src/repositories/Users.repository';
 
 @Injectable()
 export class ShopInfoService {
     constructor(
         private readonly shopInfoRepository: ShopInfoRepository,
-        private readonly firebaseService: FirebaseService
+        private readonly firebaseService: FirebaseService,
+        private readonly usersRepository: UsersRepository
     ) { }
 
     async create(createShopInfoDto: CreateShopInfoDto, userId: number, file?: Express.Multer.File): Promise<{ id: number }> {
@@ -56,8 +58,13 @@ export class ShopInfoService {
         };
     }
 
-    async findList(): Promise<ResponseShopInfoListDto[]> {
-        const result = await this.shopInfoRepository.findList();
+    async findList(userId: number): Promise<ResponseShopInfoListDto[]> {
+        let permissions: number[] = [];
+        if(userId){
+            const result = await this.usersRepository.findRolePermissions(userId);
+            permissions = result.map(item => item.shopId);
+        }
+        const result = await this.shopInfoRepository.findList(permissions);
         
         // Transform each entity to ResponseShopInfoListDto using class-transformer
         // This ensures the @EncodeId decorator is properly applied

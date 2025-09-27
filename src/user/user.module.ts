@@ -9,5 +9,6 @@ import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
   imports: [AdminAuthModule,UsersRepository,ShopInfoRepository],
   controllers: [UserController],
   providers: [UserService, UsersRepository, ShopInfoRepository],
+  exports: [UserService, UsersRepository],
 })
 export class UserModule {}

@@ -3,6 +3,7 @@ import { ReportService } from './report.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { ReportBranchIncomeDto, ReportKbankPaymentDto } from './dto/report.dto';
+import { User } from 'src/decorators/user.decorator';
 
 @ApiTags('Report')
 @ApiBearerAuth()
@@ -13,32 +14,44 @@ export class ReportController {
     constructor(private readonly reportService: ReportService) { }
 
     @Get('branch-income')
-    findBranchIncome(@Query() query: ReportBranchIncomeDto) {
+    findBranchIncome(
+        @Query() query: ReportBranchIncomeDto,
+        @User() userId: number
+    ) {
         try {
-            return this.reportService.findBranchIncome(query);
+            return this.reportService.findBranchIncome(query, userId);
         } catch (error) {
             throw new BadRequestException(error.message);
         }
     }
 
     @Get('branch-income-sum')
-    sumBranchIncome(@Query() query: ReportBranchIncomeDto) {
-        return this.reportService.sumBranchIncome(query);
+    sumBranchIncome(
+        @Query() query: ReportBranchIncomeDto,
+        @User() userId: number
+    ) {
+        return this.reportService.sumBranchIncome(query, userId);
     }
 
     @Get('kbank-payment')
-    kbankPayment(@Query() query: ReportKbankPaymentDto) {
+    kbankPayment(
+        @Query() query: ReportKbankPaymentDto,
+        @User() userId: number
+    ) {
         try {
-            return this.reportService.kbankPayment(query);
+            return this.reportService.kbankPayment(query, userId);
         } catch (error) {
             throw new BadRequestException(error.message);
         }
     }
 
     @Get('kbank-payment-sum')
-    kbankPaymentSum(@Query() query: ReportKbankPaymentDto) {
+    kbankPaymentSum(
+        @Query() query: ReportKbankPaymentDto,
+        @User() userId: number
+    ) {
         try {
-            return this.reportService.kbankPaymentSum(query);
+            return this.reportService.kbankPaymentSum(query, userId);
         } catch (error) {
             throw new BadRequestException(error.message);
         }
