@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { CreateShopInfoDto } from './dto/create-shop-info.dto';
+import { CreateShopBankDto, CreateShopInfoDto } from './dto/create-shop-info.dto';
 import { UpdateShopInfoDto } from './dto/update-shop-info.dto';
 import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
@@ -157,5 +157,14 @@ export class ShopInfoService {
                 console.error('Error uploading file to Firebase:', error);
                 throw new UnauthorizedException(error.message || 'Failed to upload file');
             }
+    }
+
+    async findBank(id: number) {
+        const result = await this.shopInfoRepository.findBankById(id);
+        return result;
+    }
+
+    async createOrUpdateBank(id: number, body: CreateShopBankDto, userId: number) {
+        return this.shopInfoRepository.createOrUpdateBank(id, body, userId);
     }
 }

@@ -6,6 +6,7 @@ import { KbankService } from 'src/bank/kbank/kbank.service';
 import { MachineProgramRepository } from 'src/repositories/MachineProgram.repository';
 import { ShopManagementRepository } from 'src/repositories/ShopManagement.repository';
 import moment from 'moment';
+import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 
 @Injectable()
 export class IotPaymentService {
@@ -15,6 +16,7 @@ export class IotPaymentService {
         private readonly kbankService: KbankService,
         private readonly machineProgramRepository: MachineProgramRepository,
         private readonly shopManagementRepository: ShopManagementRepository,
+        private readonly shopInfoRepository: ShopInfoRepository,
     ) { }
 
     async getQRPayment(query: IotPaymentQRPaymentRequestDto) {
@@ -24,8 +26,25 @@ export class IotPaymentService {
         }
 
         const shopManagement = await this.shopManagementRepository.findByIdIoT(query.iotId);
+        
         if (!shopManagement) {
             throw new BadRequestException('Machine not found');
+        }
+        const shopInfo = await this.shopInfoRepository.findBankById(shopManagement.shopInfoID);
+        if (!shopInfo) {
+            throw new BadRequestException('Shop info not found');
+        }
+        let bankActive: { MERCHANT_ID: string, PARTNER_ID: string, PARTNER_SECRET: string } = {
+            MERCHANT_ID: '',
+            PARTNER_ID: '',
+            PARTNER_SECRET: '',
+        };
+        if(shopInfo.bankActiveId && shopInfo.bankActive.param){
+            bankActive = {
+                MERCHANT_ID : shopInfo.bankActive.param?.merchantId || '',
+                PARTNER_ID : shopInfo.bankActive.param?.partnerId || '',
+                PARTNER_SECRET : shopInfo.bankActive.param?.partnerSecret || '',
+            }
         }
         // console.log('programInfo', programInfo)
         // console.log('shopManagement', shopManagement)
@@ -37,7 +56,7 @@ export class IotPaymentService {
             ref3: shopManagement.shopManagementKey,
             ref4: shopManagement.shopInfoID.toString(),
         }
-        const response: { qrCode: string } = await this.kbankService.generateKbankQRPayment(data);
+        const response: { qrCode: string } = await this.kbankService.generateKbankQRPayment(data, bankActive);
 
         return {
             qrRawData: response?.qrCode,

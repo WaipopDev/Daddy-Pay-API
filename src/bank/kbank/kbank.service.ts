@@ -140,7 +140,7 @@ export class KbankService {
         }
     }
 
-    async generateKbankQRPayment(data: { amount: number, partnerTxnUid: string, ref1: string, ref2: string, ref3: string, ref4: string }): Promise<{ qrCode: string }> {
+    async generateKbankQRPayment(data: { amount: number, partnerTxnUid: string, ref1: string, ref2: string, ref3: string, ref4: string }, bankActive: { MERCHANT_ID: string, PARTNER_ID: string, PARTNER_SECRET: string }): Promise<{ qrCode: string }> {
         try {
             const firestore = this.firebaseService.getFirestore();
             const docRef = firestore.collection(KB_AUTH);
@@ -184,9 +184,9 @@ export class KbankService {
             const { agent } = await this.createHttpsAgent();
             // const now = moment();
             const param = {
-                merchantId: this.configService.get('MERCHANT_ID_KL'),
-                partnerId: this.configService.get('PARTNER_ID_KL'),
-                partnerSecret: this.configService.get('PARTNER_SECRET_KL'),
+                merchantId: bankActive.MERCHANT_ID || this.configService.get('MERCHANT_ID_KL'),
+                partnerId: bankActive.PARTNER_ID || this.configService.get('PARTNER_ID_KL'),
+                partnerSecret: bankActive.PARTNER_SECRET || this.configService.get('PARTNER_SECRET_KL'),
                 partnerTxnUid: data.partnerTxnUid,
                 qrType: '3',
                 reference1: data.ref1,

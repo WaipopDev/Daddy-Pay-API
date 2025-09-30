@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, UseInterceptors, UploadedFile, Query, BadRequestException, ClassSerializerInterceptor, UnauthorizedException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ShopInfoService } from './shop-info.service';
-import { CreateShopInfoDto } from './dto/create-shop-info.dto';
+import { CreateShopBankDto, CreateShopInfoDto } from './dto/create-shop-info.dto';
 import { CreateShopInfoMultipartDto } from './dto/create-shop-info-multipart.dto';
-import { UpdateShopInfoDto } from './dto/update-shop-info.dto';
+import { ResponseUpdateShopInfoDto, UpdateShopInfoDto } from './dto/update-shop-info.dto';
 import { ApiBearerAuth, ApiResponse, ApiTags, ApiConsumes, ApiBody, ApiQuery, ApiOperation } from '@nestjs/swagger';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
@@ -106,7 +106,7 @@ export class ShopInfoController {
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
     @Get(':id')
-    async findOne(@Param('id') encodedId: string): Promise<ResponseShopInfoDto | null> {
+    async findOne(@Param('id') encodedId: string): Promise<ResponseUpdateShopInfoDto | null> {
         try {
             const id = IdEncoderService.decode(encodedId);
             return this.shopInfoService.findOne(id);
@@ -158,5 +158,37 @@ export class ShopInfoController {
         } catch (error) {
             throw new UnauthorizedException('Invalid shop ID format');
         }
+    }
+
+    @ApiOperation({ 
+        summary: 'ดึงข้อมูลธนาคาร', 
+        description: 'API สำหรับดึงข้อมูลธนาคาร' 
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @Get('bank/:id')
+    findBank(@Param('id') encodedId: string) { 
+        const id = IdEncoderService.decode(encodedId);
+        return this.shopInfoService.findBank(id);
+    }
+
+    @ApiOperation({ 
+        summary: 'บันทึกข้อมูลธนาคาร', 
+        description: 'API สำหรับดึงข้อมูลธนาคาร' 
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
+    @Post('bank/:id')
+    createOrUpdateBank(
+        @User() userId: number,
+        @Param('id') encodedId: string, 
+        @Body() body: CreateShopBankDto
+    ) { 
+        const id = IdEncoderService.decode(encodedId);
+        if (!id) {
+            throw new UnauthorizedException('Invalid shop ID format');
+        }
+        return this.shopInfoService.createOrUpdateBank(id, body, userId);
     }
 }

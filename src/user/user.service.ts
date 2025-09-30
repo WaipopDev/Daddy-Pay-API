@@ -19,11 +19,11 @@ export class UserService {
         if (checkUserNameAndEmail) {
             throw new BadRequestException('Username and email already exists');
         }
-        
-        // Decode shop IDs
-        const decodedShopIds = createUserDto.shopIds.map((shopId) => {
-            return `${IdEncoderService.decode(shopId)}`;
-        });
+        const decodedShopIds = createUserDto.shopIds;
+        // // Decode shop IDs
+        // const decodedShopIds = createUserDto.shopIds.map((shopId) => {
+        //     return `${IdEncoderService.decode(shopId)}`;
+        // });
         
         // Validate that all shops exist
         for (const shopId of decodedShopIds) {

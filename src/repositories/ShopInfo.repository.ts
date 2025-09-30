@@ -5,12 +5,18 @@ import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginat
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
 import { ResponseShopInfoListDto, SortDto } from 'src/shop-info/dto/shoo-info.dto';
 import { PaginationDto } from 'src/constants/pagination.constant';
+import { CreateShopBankDto } from 'src/shop-info/dto/create-shop-info.dto';
+import { ShopBankEntity } from 'src/models/entities/ShopBank.entity';
 
 export class ShopInfoRepository {
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
     
     private get repo() {
         return this.db.getRepository(ShopInfoEntity);
+    }
+
+    private get repoBank() {
+        return this.db.getRepository(ShopBankEntity);
     }
 
     private async findOneShopInfo(where: FindOptionsWhere<ShopInfoEntity>) {
@@ -270,6 +276,54 @@ export class ShopInfoRepository {
         return {
             ...result,
             items: transformedItems
+        };
+    }
+
+    async findBankById(id: number) {
+        return this.repo.findOne({ 
+            where: { id },
+            select: {
+                id: true,
+                bankActiveName: true,
+                bankActiveId: true,
+                bankActive: {
+                    id: true,
+                    title: true,
+                    param: true,
+                }
+            },
+            relations: {
+                bankActive:true
+            }
+         });
+    }
+
+    async createOrUpdateBank(id: number, body: CreateShopBankDto, userId: number) {
+        
+        if (body.bankActiveId) {
+            await this.repo.update(id, {
+                bankActiveName: body.bankActiveName,
+                bankActiveId: body.bankActiveId,
+            });
+            await this.repoBank.update(body.bankActiveId, {
+                title: body.bankActiveName,
+                param: body.bankActiveParam || {},
+                updatedBy: userId,
+            });
+        }else{
+            const bank = await this.repoBank.save({
+                title: body.bankActiveName,
+                param: body.bankActiveParam || {},
+                updatedBy: userId,
+                createdBy: userId,
+            });
+            await this.repo.update(id, {
+                bankActiveName: body.bankActiveName,
+                bankActiveId: bank.id,
+            });
+        }
+        return {
+            message: 'บันทึกข้อมูลธนาคารสำเร็จ'
         };
     }
 }

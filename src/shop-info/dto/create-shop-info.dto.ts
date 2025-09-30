@@ -6,6 +6,8 @@ import {
   IsEnum,
   MaxLength,
   IsNotEmpty,
+  IsNumber,
+  IsObject,
 } from 'class-validator';
 
 enum ShopStatus {
@@ -124,4 +126,23 @@ export class CreateShopInfoDto {
   @IsNotEmpty()
   @MaxLength(255)
   shopBankBranch: string;
+}
+
+
+export class CreateShopBankDto {
+  @ApiProperty({ description: 'Bank active name', maxLength: 255 })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  bankActiveName: string;
+
+  @ApiProperty({ description: 'Bank active ID', required: false })
+  @IsNumber()
+  @IsOptional()
+  bankActiveId?: number | null;
+
+  @ApiProperty({ description: 'Bank active param', required: false })
+  @IsObject()
+  @IsOptional()
+  bankActiveParam?: object | null;
 }

@@ -1,5 +1,6 @@
-import { Entity, Column } from "typeorm"
+import { Entity, Column, OneToOne, JoinColumn } from "typeorm"
 import { DefaultEntity } from "./default.entity";
+import { ShopBankEntity } from "./ShopBank.entity";
 
 @Entity({name: "shop_info"})
 export class ShopInfoEntity extends DefaultEntity {
@@ -60,4 +61,14 @@ export class ShopInfoEntity extends DefaultEntity {
 
     @Column({ name: 'shop_bank_branch', type: 'varchar', length: 255 })
     shopBankBranch: string;
+
+    @Column({ name: 'bank_active_name', type: 'varchar', length: 255, nullable: true })
+    bankActiveName: string;
+
+    @Column({ name: 'bank_active_id', type: 'int', nullable: true })
+    bankActiveId: number;
+
+    @OneToOne(() => ShopBankEntity)
+    @JoinColumn({ name: 'bank_active_id' })
+    bankActive: ShopBankEntity;
 }

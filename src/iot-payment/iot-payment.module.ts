@@ -6,10 +6,11 @@ import { AuthModule } from 'src/auth/auth.module';
 import { KbankService } from 'src/bank/kbank/kbank.service';
 import { MachineProgramRepository } from 'src/repositories/MachineProgram.repository';
 import { ShopManagementRepository } from 'src/repositories/ShopManagement.repository';
+import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 
 @Module({
   imports: [FirebaseModule, AuthModule],
   controllers: [IotPaymentController],
-  providers: [IotPaymentService, KbankService, MachineProgramRepository, ShopManagementRepository],
+  providers: [IotPaymentService, KbankService, MachineProgramRepository, ShopManagementRepository, ShopInfoRepository],
 })
 export class IotPaymentModule {}
