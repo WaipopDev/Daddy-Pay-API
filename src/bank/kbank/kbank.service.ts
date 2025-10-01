@@ -177,7 +177,7 @@ export class KbankService {
                     expired: expired.toISOString(),
                 });
             }
-
+            console.log('access_token', access_token)
 
             const authHeader = `Bearer ${access_token}`;
             const url = `${this.configService.get('OAUTH_KL')}/v1/qrpayment/request`;
@@ -205,6 +205,7 @@ export class KbankService {
                 },
                 httpsAgent: agent,
             });
+            console.log('response', response.data)
             return {
                 qrCode: response.data.qrCode,
             };
