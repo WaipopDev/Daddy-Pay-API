@@ -154,7 +154,7 @@ export class KbankService {
                     const expired = moment(dataToken.expired);
 
                     // เช็คว่าเกิน 29 นาทีหรือยัง (ถ้า now > expired - 29 นาที)
-                    if (now.isBefore(expired.clone().subtract(29, 'minutes'))) {
+                    if (now.isBefore(expired.clone().subtract(10, 'minutes'))) {
                         access_token = dataToken.access_token; // ยังไม่เกิน 29 นาที
                     }else{
                         // ถ้าเกิน 29 นาที
