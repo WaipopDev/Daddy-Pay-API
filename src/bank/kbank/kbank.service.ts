@@ -140,7 +140,7 @@ export class KbankService {
         }
     }
 
-    async generateKbankQRPayment(data: { amount: number, partnerTxnUid: string, ref1: string, ref2: string, ref3: string, ref4: string }, bankActive: { MERCHANT_ID: string, PARTNER_ID: string, PARTNER_SECRET: string }): Promise<{ qrCode: string }> {
+    async generateKbankQRPayment(data: { amount: number, partnerTxnUid: string, ref1: string, ref2: string, ref3: string, ref4: string }, bankActive: { MERCHANT_ID: string, PARTNER_ID: string, PARTNER_SECRET: string }): Promise<{ qrCode: string, errorCode: string, errorDesc: string, partnerTxnUid: string }> {
         try {
             const firestore = this.firebaseService.getFirestore();
             const docRef = firestore.collection(KB_AUTH);
@@ -208,6 +208,9 @@ export class KbankService {
             console.log('response', response.data)
             return {
                 qrCode: response.data.qrCode,
+                errorCode:response.data?.errorCode || '',
+                errorDesc:response.data?.errorDesc || '',
+                partnerTxnUid:response.data?.partnerTxnUid || '',
             };
         } catch (error) {
             console.error('Error adding document: ', error.response?.data);

@@ -56,12 +56,15 @@ export class IotPaymentService {
             ref3: shopManagement.shopManagementKey,
             ref4: shopManagement.shopInfoID.toString(),
         }
-        const response: { qrCode: string } = await this.kbankService.generateKbankQRPayment(data, bankActive);
+        const response: { qrCode: string, errorCode: string, errorDesc: string, partnerTxnUid: string } = await this.kbankService.generateKbankQRPayment(data, bankActive);
 
         return {
             qrRawData: response?.qrCode,
             ref1: data.ref1,
             ref2: data.ref2,
+            errorCode: response?.errorCode,
+            errorDesc: response?.errorDesc,
+            partnerTxnUid: response?.partnerTxnUid,
         };
     }
 
