@@ -39,7 +39,6 @@ export class IotPaymentService {
             PARTNER_ID: '',
             PARTNER_SECRET: '',
         };
-        console.log('shopInfo', shopInfo)
         if(shopInfo.bankActiveId && shopInfo.bankActive.param){
             bankActive = {
                 MERCHANT_ID : shopInfo.bankActive.param?.merchantId || '',
@@ -47,7 +46,6 @@ export class IotPaymentService {
                 PARTNER_SECRET : shopInfo.bankActive.param?.partnerSecret || '',
             }
         }
-        console.log('bankActive', bankActive)
         // console.log('programInfo', programInfo)
         // console.log('shopManagement', shopManagement)
         const data = {

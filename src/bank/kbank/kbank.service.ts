@@ -135,7 +135,7 @@ export class KbankService {
             });
             return response.data;
         } catch (error) {
-            this.logger.error('OAuthKL Token Error:', error);
+            this.logger.error('OAuthKL Token Error:', error.response?.data);
             throw new Error(error?.message || 'OAuthKL token request failed');
         }
     }
