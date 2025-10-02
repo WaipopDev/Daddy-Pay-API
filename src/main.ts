@@ -2,8 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { BadRequestException, ValidationPipe, VersioningType } from '@nestjs/common';
+import moment from 'moment-timezone';
 
 async function bootstrap() {
+    // Set global timezone for moment.js to UTC+7
+    moment.tz.setDefault('Asia/Bangkok'); // UTC+7 timezone
+    
     const app = await NestFactory.create(AppModule);
     app.enableCors({
         origin: true, // หรือกำหนด specific domains ตามต้องการ
