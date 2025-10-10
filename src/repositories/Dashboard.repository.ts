@@ -65,6 +65,65 @@ export class DashboardRepository {
         };
     }
 
+    async findByBranchTotalSale(branchId: number) {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const salesByDay = this.repoTransaction.createQueryBuilder('machineTransaction')
+        salesByDay.select('machineTransaction.price as price')
+        salesByDay.where('machineTransaction.deletedAt IS NULL')
+        salesByDay.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
+        salesByDay.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startOfDay });
+        salesByDay.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endOfDay });
+        const totalSaleByDay = await salesByDay.getRawMany();
+        
+        const salesByWeek = this.repoTransaction.createQueryBuilder('machineTransaction')
+        salesByWeek.select('machineTransaction.price as price')
+        salesByWeek.where('machineTransaction.deletedAt IS NULL')
+        salesByWeek.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
+        salesByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: moment(startOfDay).startOf('week').toDate() });
+        salesByWeek.andWhere('machineTransaction.createdAt <= :endDate', { endDate: moment(endOfDay).endOf('week').toDate() });
+        const totalSaleByWeek = await salesByWeek.getRawMany();
+
+        const salesByMonth = this.repoTransaction.createQueryBuilder('machineTransaction')
+        salesByMonth.select('machineTransaction.price as price')
+        salesByMonth.where('machineTransaction.deletedAt IS NULL')
+        salesByMonth.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
+        salesByMonth.andWhere('machineTransaction.createdAt >= :startDate', { startDate: moment(startOfDay).startOf('month').toDate() });
+        salesByMonth.andWhere('machineTransaction.createdAt <= :endDate', { endDate: moment(endOfDay).endOf('month').toDate() });
+        const totalSaleByMonth = await salesByMonth.getRawMany();
+        
+        const convertPricesToNumbers = (data: {price: string}[]) => data.map(item => ({ ...item, price: parseFloat(item.price) }));
+        
+        const totalSaleByDayNumeric = convertPricesToNumbers(totalSaleByDay);
+        const totalSaleByWeekNumeric = convertPricesToNumbers(totalSaleByWeek);
+        const totalSaleByMonthNumeric = convertPricesToNumbers(totalSaleByMonth);
+        
+        return {
+            totalSaleByDay: _.sumBy(totalSaleByDayNumeric,'price'),
+            totalSaleByWeek: _.sumBy(totalSaleByWeekNumeric, 'price'),
+            totalSaleByMonth: _.sumBy(totalSaleByMonthNumeric, 'price'),
+        };
+    }
+
+    async findByBranchTotalMachine(branchId: number) {
+        const machines = this.repoShopManagement.createQueryBuilder('shopManagement')
+        machines.select([
+            'shopManagement.id as id', 
+            'shopManagement.shopManagementStatusOnline as status_online'
+        ])
+        machines.where('shopManagement.deletedAt IS NULL')
+        machines.andWhere('shopManagement.shopInfoID = :branchId', { branchId: branchId });
+        const result = await machines.getRawMany();
+        return {
+            totalActiveMachine: _.filter(result, { status_online: 'active' }).length,
+            totalInactiveMachine: _.filter(result, { status_online: 'inactive' }).length,
+            totalMachine: result.length,
+        };
+    }
+
     async findAllTotalMachine(permissions: number[]) {
         const machines = this.repoShopManagement.createQueryBuilder('shopManagement')
         machines.select([

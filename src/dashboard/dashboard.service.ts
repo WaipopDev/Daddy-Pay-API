@@ -32,6 +32,8 @@ export class DashboardService {
 
     async getGraphData(branchId: string) {
         const branchIdDecoded = IdEncoderService.decode(branchId);
+        const branchTotalSale = await this.dashboardRepo.findByBranchTotalSale(branchIdDecoded);
+        const branchTotalMachine = await this.dashboardRepo.findByBranchTotalMachine(branchIdDecoded);
         const graphDataByDay = await this.dashboardRepo.findAllGraphDataByDay(branchIdDecoded);
         const convertedDataByDay = this.convertDataForChartByDay(graphDataByDay);
         const graphDataByWeek = await this.dashboardRepo.findAllGraphDataByWeek(branchIdDecoded);
@@ -41,6 +43,8 @@ export class DashboardService {
         const graphDataByYear = await this.dashboardRepo.findAllGraphDataByYear(branchIdDecoded);
         const convertedDataByYear = this.convertDataForChartByYear(graphDataByYear);
         return {
+            branchTotalSale: branchTotalSale,
+            branchTotalMachine: branchTotalMachine,
             graphDataByDay: convertedDataByDay,
             graphDataByWeek: convertedDataByWeek,
             graphDataByMonth: convertedDataByMonth,
