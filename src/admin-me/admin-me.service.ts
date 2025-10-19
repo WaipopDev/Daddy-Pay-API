@@ -32,7 +32,13 @@ export class AdminMeService {
             updatedAt: user.updatedAt,
             createdBy: user.createdBy,
             updatedBy: user.updatedBy,
-            rolePermissions:rolePermissions
+            rolePermissions:rolePermissions.map((permission) => {
+                return {
+                    id: permission.id,
+                    shopId: permission.shopId,
+                    status: permission.status,
+                };
+            })
         };
     }
 }
