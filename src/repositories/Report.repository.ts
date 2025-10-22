@@ -13,6 +13,7 @@ import { ShopManagementEntity } from 'src/models/entities/ShopManagement.entity'
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
 import { ProgramInfoEntity } from 'src/models/entities/ProgramInfo.entity';
 import { MachineProgramEntity } from 'src/models/entities/MachineProgram.entity';
+import moment from 'moment';
 
 export class ReportRepository {
     constructor(
@@ -49,17 +50,10 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = new Date(startDate);
-        const endOfDay = new Date(endDate);
+        const startOfDay = moment.utc(startDate).startOf('day').toDate();
+        const endOfDay = moment.utc(endDate).endOf('day').toDate();
 
         // Check if dates are valid
-        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
-            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
-        }
-
-        startOfDay.setHours(0, 0, 0, 0);
-        endOfDay.setHours(23, 59, 59, 999);
-
         queryBuilder.select([
             'machineTransaction.id',
             'machineTransaction.shopInfoId',
@@ -120,17 +114,9 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = new Date(startDate);
-        const endOfDay = new Date(endDate);
+        const startOfDay = moment.utc(startDate).startOf('day').toDate();
+        const endOfDay = moment.utc(endDate).endOf('day').toDate();
 
-        // Check if dates are valid
-        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
-            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
-        }
-
-        startOfDay.setHours(0, 0, 0, 0);
-        endOfDay.setHours(23, 59, 59, 999);
-        
         queryBuilder.select('SUM(machineTransaction.price) as totalPrice');
         queryBuilder.where('machineTransaction.deletedAt IS NULL');
 
@@ -169,16 +155,8 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = new Date(startDate);
-        const endOfDay = new Date(endDate);
-
-        // Check if dates are valid
-        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
-            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
-        }
-
-        startOfDay.setHours(0, 0, 0, 0);
-        endOfDay.setHours(23, 59, 59, 999);
+        const startOfDay = moment.utc(startDate).startOf('day').toDate();
+        const endOfDay = moment.utc(endDate).endOf('day').toDate();
 
         const firestore = this.firebaseService.getFirestore();
         const docRef = firestore.collection(KB_CALLBACK);
@@ -254,16 +232,9 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = new Date(startDate);
-        const endOfDay = new Date(endDate);
+        const startOfDay = moment.utc(startDate).startOf('day').toDate();
+        const endOfDay = moment.utc(endDate).endOf('day').toDate();
 
-        // Check if dates are valid
-        if (isNaN(startOfDay.getTime()) || isNaN(endOfDay.getTime())) {
-            throw new Error('Invalid date format. Please use YYYY-MM-DD format');
-        }
-
-        startOfDay.setHours(0, 0, 0, 0);
-        endOfDay.setHours(23, 59, 59, 999);
 
         const firestore = this.firebaseService.getFirestore();
         const docRef = firestore.collection(KB_CALLBACK);
