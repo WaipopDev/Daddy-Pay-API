@@ -95,38 +95,32 @@ export class DashboardService {
     }
 
     private convertDataForChartByWeek(data: {price: string, createdAt: Date}[]) {
-        // Create day labels for 7 days of the week
-        const dayLabels: string[] = [];
+        // Create day labels for Monday-Sunday week
+        const dayLabels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const lastWeekData = new Array(7).fill(0);
         const thisWeekData = new Array(7).fill(0);
         
-        // Generate labels for the past 7 days
-        for (let i = 6; i >= 0; i--) {
-            const day = moment.utc().subtract(i, 'day');
-            dayLabels.push(day.format('ddd')); // e.g., "Mon, Jan 15"
-        }
-
-        // Get the start and end of last week (7-14 days ago)
-        const lastWeekStart = moment.utc().subtract(13, 'day').startOf('day');
-        const lastWeekEnd = moment.utc().subtract(7, 'day').endOf('day');
+        // Get the start and end of last week (Monday to Sunday)
+        const lastWeekStart = moment.tz('Asia/Bangkok').subtract(1, 'week').startOf('week');
+        const lastWeekEnd = moment.tz('Asia/Bangkok').subtract(1, 'week').endOf('week');
         
-        // Get the start and end of this week (0-6 days ago)
-        const thisWeekStart = moment.utc().subtract(6, 'day').startOf('day');
-        const thisWeekEnd = moment.utc().endOf('day');
+        // Get the start and end of this week (Monday to Sunday)
+        const thisWeekStart = moment.tz('Asia/Bangkok').startOf('week');
+        const thisWeekEnd = moment.tz('Asia/Bangkok').endOf('week');
 
         // Process each transaction
         data.forEach((transaction) => {
-            const transactionDate = moment(transaction.createdAt);
+            const transactionDate = moment.tz(transaction.createdAt, 'Asia/Bangkok');
             const price = parseFloat(transaction.price) || 0;
             
-            // Check if transaction is within last week range
+            // Check if transaction is within last week range (Monday-Sunday)
             if (transactionDate.isBetween(lastWeekStart, lastWeekEnd, 'day', '[]')) {
                 const dayIndex = transactionDate.diff(lastWeekStart, 'days');
                 if (dayIndex >= 0 && dayIndex < 7) {
                     lastWeekData[dayIndex] += price;
                 }
             }
-            // Check if transaction is within this week range
+            // Check if transaction is within this week range (Monday-Sunday)
             else if (transactionDate.isBetween(thisWeekStart, thisWeekEnd, 'day', '[]')) {
                 const dayIndex = transactionDate.diff(thisWeekStart, 'days');
                 if (dayIndex >= 0 && dayIndex < 7) {
