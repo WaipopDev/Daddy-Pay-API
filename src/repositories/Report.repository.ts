@@ -50,8 +50,8 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = moment.utc(startDate).startOf('day').toDate();
-        const endOfDay = moment.utc(endDate).endOf('day').toDate();
+        const startOfDay = moment.tz(startDate, 'Asia/Bangkok').startOf('day').toDate();
+        const endOfDay = moment.tz(endDate, 'Asia/Bangkok').endOf('day').toDate();
 
         // Check if dates are valid
         queryBuilder.select([
@@ -114,8 +114,8 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = moment.utc(startDate).startOf('day').toDate();
-        const endOfDay = moment.utc(endDate).endOf('day').toDate();
+        const startOfDay = moment.tz(startDate, 'Asia/Bangkok').startOf('day').toDate();
+        const endOfDay = moment.tz(endDate, 'Asia/Bangkok').endOf('day').toDate();
 
         queryBuilder.select('SUM(machineTransaction.price) as totalPrice');
         queryBuilder.where('machineTransaction.deletedAt IS NULL');
@@ -155,8 +155,8 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = moment.utc(startDate).startOf('day').toDate();
-        const endOfDay = moment.utc(endDate).endOf('day').toDate();
+        const startOfDay = moment.tz(startDate, 'Asia/Bangkok').startOf('day').toDate();
+        const endOfDay = moment.tz(endDate, 'Asia/Bangkok').endOf('day').toDate();
 
         const firestore = this.firebaseService.getFirestore();
         const docRef = firestore.collection(KB_CALLBACK);
@@ -232,8 +232,8 @@ export class ReportRepository {
             throw new Error('startDate and endDate are required');
         }
 
-        const startOfDay = moment.utc(startDate).startOf('day').toDate();
-        const endOfDay = moment.utc(endDate).endOf('day').toDate();
+        const startOfDay = moment.tz(startDate, 'Asia/Bangkok').startOf('day').toDate();
+        const endOfDay = moment.tz(endDate, 'Asia/Bangkok').endOf('day').toDate();
 
 
         const firestore = this.firebaseService.getFirestore();
