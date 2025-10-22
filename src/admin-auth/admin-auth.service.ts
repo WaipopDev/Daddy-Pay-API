@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { CreateAdminAuthDto } from './dto/create-admin-auth.dto';
 import { UpdateAdminAuthDto } from './dto/update-admin-auth.dto';
 import { UsersEntity } from 'src/models/entities/Users.entity';
@@ -21,9 +21,16 @@ export class AdminAuthService {
     ) { }
 
     private jwtSign(user: UsersEntity): string {
+        const secret = this.config.get<string>('JWT_ADMIN_SECRET');
+        const expire = this.config.get<string>('JWT_ADMIN_EXPIRE');
+
+        if (!secret || !expire) {
+            throw new Error('JWT_ADMIN_SECRET or JWT_ADMIN_EXPIRE not configured');
+        }
+
         return this.jwtService.sign(
             {
-                sub: user.id,
+                sub: user.id.toString(),
                 username: user.username,
                 email: user.email,
                 role: user.role,
@@ -32,10 +39,10 @@ export class AdminAuthService {
                 subscribeStartDate: user.subscribeStartDate,
             },
             {
-                expiresIn: this.config.get<string>('JWT_ADMIN_EXPIRE'),
-                secret: this.config.get<string>('JWT_ADMIN_SECRET'),
+                expiresIn: expire,
+                secret: secret,
                 algorithm: 'HS256',
-            },
+            } as JwtSignOptions
         );
     }
 

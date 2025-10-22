@@ -28,7 +28,8 @@ export class FirebaseService implements OnModuleInit {
             });
         } else {
             // วิธีที่ 2: ใช้ JSON file (fallback)
-            const serviceAccount = require('../../firebase-key.json');
+            const path = require('path');
+            const serviceAccount = require(path.join(process.cwd(), 'firebase-key.json'));
             const serviceAccountCopy = JSON.parse(JSON.stringify(serviceAccount));
             
             this.firebaseApp = admin.initializeApp({

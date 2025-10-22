@@ -18,10 +18,8 @@ export class DashboardRepository {
     }
 
     async findAllTotalSale(permissions: number[]) {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        const startOfDay = moment.utc().startOf('day').toDate();
+        const endOfDay = moment.utc().endOf('day').toDate();
 
         const salesByDay = this.repoTransaction.createQueryBuilder('machineTransaction')
         salesByDay.select('machineTransaction.price as price')
@@ -66,10 +64,8 @@ export class DashboardRepository {
     }
 
     async findByBranchTotalSale(branchId: number) {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        const startOfDay = moment.utc().startOf('day').toDate();
+        const endOfDay = moment.utc().endOf('day').toDate();
 
         const salesByDay = this.repoTransaction.createQueryBuilder('machineTransaction')
         salesByDay.select('machineTransaction.price as price')
