@@ -97,6 +97,7 @@ export class ShopInfoController {
     findListUser():Promise<ResponseShopInfoListUserDto[]> { 
         return this.shopInfoService.findListUser();
     }
+    
 
     @ApiOperation({ 
         summary: 'ดึงข้อมูลร้านค้าตาม ID', 

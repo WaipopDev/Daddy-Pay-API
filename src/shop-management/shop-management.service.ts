@@ -77,10 +77,10 @@ export class ShopManagementService {
     }
 
     async findAll(query: QueryShopManagementDto): Promise<ShopManagementPaginationDto> {
-        const { page = 1, limit = 10, shopId, machineId, programId, ...sortOptions } = query;
-
+        const { page = 1, limit = 10, shopId: encodedShopId, machineId, programId, ...sortOptions } = query;
+        const shopId = encodedShopId ? IdEncoderService.decode(encodedShopId) : '';
         const paginationOptions = { page, limit };
-        const result = await this.shopManagementRepository.findAll(paginationOptions, sortOptions);
+        const result = await this.shopManagementRepository.findAll(paginationOptions, sortOptions, { shopId: shopId.toString() });
 
         const transformedItems = result.items.map(item =>
             plainToInstance(ResponseShopManagementDto, item, {

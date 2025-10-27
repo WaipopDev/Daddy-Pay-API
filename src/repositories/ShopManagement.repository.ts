@@ -75,7 +75,7 @@ export class ShopManagementRepository {
         return this.findOneShopManagement({ shopManagementIotID, deletedAt: IsNull() });
     }
 
-    async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<ShopManagementEntity>> {
+    async findAll(option: PaginationDto, sort: SortDto, query: { shopId?: string }): Promise<Pagination<ShopManagementEntity>> {
         const queryBuilder = this.repo.createQueryBuilder('shopManagement');
         
         queryBuilder.select([
@@ -114,7 +114,10 @@ export class ShopManagementRepository {
         if (sort.column && sort.sort) {
             queryBuilder.orderBy(`shopManagement.${sort.column}`, sort.sort);
         }
-
+        if (query.shopId) {
+            queryBuilder.where('shopManagement.shopInfoID = :shopId', { shopId: query.shopId });
+        }
+        queryBuilder.orderBy('shopInfo.shopName', 'ASC');
         const paginationOptions: IPaginationOptions = {
             page: Number(option.page) || 1,
             limit: Number(option.limit) || 10,
