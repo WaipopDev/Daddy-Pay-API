@@ -34,12 +34,16 @@ export class DashboardService {
         const branchIdDecoded = IdEncoderService.decode(branchId);
         const branchTotalSale = await this.dashboardRepo.findByBranchTotalSale(branchIdDecoded);
         const branchTotalMachine = await this.dashboardRepo.findByBranchTotalMachine(branchIdDecoded);
+
         const graphDataByDay = await this.dashboardRepo.findAllGraphDataByDay(branchIdDecoded);
         const convertedDataByDay = this.convertDataForChartByDay(graphDataByDay);
+
         const graphDataByWeek = await this.dashboardRepo.findAllGraphDataByWeek(branchIdDecoded);
         const convertedDataByWeek = this.convertDataForChartByWeek(graphDataByWeek);
+
         const graphDataByMonth = await this.dashboardRepo.findAllGraphDataByMonth(branchIdDecoded);
         const convertedDataByMonth = this.convertDataForChartByMonth(graphDataByMonth);
+        
         const graphDataByYear = await this.dashboardRepo.findAllGraphDataByYear(branchIdDecoded);
         const convertedDataByYear = this.convertDataForChartByYear(graphDataByYear);
         return {
@@ -100,13 +104,13 @@ export class DashboardService {
         const lastWeekData = new Array(7).fill(0);
         const thisWeekData = new Array(7).fill(0);
         
-        // Get the start and end of last week (Monday to Sunday)
-        const lastWeekStart = moment.tz('Asia/Bangkok').subtract(1, 'week').startOf('week');
-        const lastWeekEnd = moment.tz('Asia/Bangkok').subtract(1, 'week').endOf('week');
+        // Get the start and end of last week (Monday to Sunday) using isoWeek to ensure Monday is the start
+        const lastWeekStart = moment.tz('Asia/Bangkok').subtract(1, 'week').startOf('isoWeek');
+        const lastWeekEnd = moment.tz('Asia/Bangkok').subtract(1, 'week').endOf('isoWeek');
         
-        // Get the start and end of this week (Monday to Sunday)
-        const thisWeekStart = moment.tz('Asia/Bangkok').startOf('week');
-        const thisWeekEnd = moment.tz('Asia/Bangkok').endOf('week');
+        // Get the start and end of this week (Monday to Sunday) using isoWeek to ensure Monday is the start
+        const thisWeekStart = moment.tz('Asia/Bangkok').startOf('isoWeek');
+        const thisWeekEnd = moment.tz('Asia/Bangkok').endOf('isoWeek');
 
         // Process each transaction
         data.forEach((transaction) => {
@@ -115,14 +119,16 @@ export class DashboardService {
             
             // Check if transaction is within last week range (Monday-Sunday)
             if (transactionDate.isBetween(lastWeekStart, lastWeekEnd, 'day', '[]')) {
-                const dayIndex = transactionDate.diff(lastWeekStart, 'days');
+                // Use isoWeekday() - 1 to get index (Monday=1 becomes 0, Tuesday=2 becomes 1, ..., Sunday=7 becomes 6)
+                const dayIndex = transactionDate.isoWeekday() - 1;
                 if (dayIndex >= 0 && dayIndex < 7) {
                     lastWeekData[dayIndex] += price;
                 }
             }
             // Check if transaction is within this week range (Monday-Sunday)
             else if (transactionDate.isBetween(thisWeekStart, thisWeekEnd, 'day', '[]')) {
-                const dayIndex = transactionDate.diff(thisWeekStart, 'days');
+                // Use isoWeekday() - 1 to get index (Monday=1 becomes 0, Tuesday=2 becomes 1, ..., Sunday=7 becomes 6)
+                const dayIndex = transactionDate.isoWeekday() - 1;
                 if (dayIndex >= 0 && dayIndex < 7) {
                     thisWeekData[dayIndex] += price;
                 }
@@ -157,17 +163,18 @@ export class DashboardService {
             dayLabels.push(i.toString().padStart(2, '0')); // e.g., "01", "02", ..., "31"
         }
 
-        // Get the start and end of last month
-        const lastMonthStart = moment.utc().subtract(1, 'month').startOf('month');
-        const lastMonthEnd = moment.utc().subtract(1, 'month').endOf('month');
+        // Get the start and end of last month using Asia/Bangkok timezone to match repository
+        const lastMonthStart = moment.tz('Asia/Bangkok').subtract(1, 'month').startOf('month');
+        const lastMonthEnd = moment.tz('Asia/Bangkok').subtract(1, 'month').endOf('month');
         
-        // Get the start and end of this month
-        const thisMonthStart = moment.utc().startOf('month');
-        const thisMonthEnd = moment.utc().endOf('month');
+        // Get the start and end of this month using Asia/Bangkok timezone to match repository
+        const thisMonthStart = moment.tz('Asia/Bangkok').startOf('month');
+        const thisMonthEnd = moment.tz('Asia/Bangkok').endOf('month');
 
         // Process each transaction
         data.forEach((transaction) => {
-            const transactionDate = moment(transaction.createdAt);
+            // Use Asia/Bangkok timezone to match the repository query
+            const transactionDate = moment.tz(transaction.createdAt, 'Asia/Bangkok');
             const price = parseFloat(transaction.price) || 0;
             
             // Check if transaction is within last month range

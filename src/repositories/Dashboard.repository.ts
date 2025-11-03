@@ -153,8 +153,8 @@ export class DashboardRepository {
     }
 
     async findAllGraphDataByWeek(branchId: number) {
-        const startDate = moment.tz('Asia/Bangkok').subtract(1, 'week').startOf('week').toDate();
-        const endDate = moment.tz('Asia/Bangkok').endOf('week').toDate();
+        const startDate = moment.tz('Asia/Bangkok').subtract(1, 'week').startOf('isoWeek').toDate();
+        const endDate = moment.tz('Asia/Bangkok').endOf('isoWeek').toDate();
         const graphDataByWeek = this.repoTransaction.createQueryBuilder('machineTransaction')
         graphDataByWeek.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
         graphDataByWeek.where('machineTransaction.deletedAt IS NULL')
