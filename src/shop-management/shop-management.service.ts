@@ -196,7 +196,8 @@ export class ShopManagementService {
             throw new NotFoundException('Shop management not found');
         }
 
-        await this.shopManagementRepository.softDeleteShopManagement(id);
+        // await this.shopManagementRepository.softDeleteShopManagement(id);
+        await this.shopManagementRepository.deleteShopManagement(id);
     }
 
     async findList(): Promise<ResponseShopManagementListDto[]> {
