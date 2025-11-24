@@ -116,6 +116,22 @@ export class ShopInfoController {
         }
     }
 
+    @ApiOperation({ 
+        summary: 'ดึงข้อมูลร้านค้าตาม ID', 
+        description: 'API สำหรับดึงข้อมูลร้านค้าตาม ID ที่เข้ารหัสแล้ว' 
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
+    @Get('by-id/:id')
+    async findOneById(@Param('id') id: string): Promise<ResponseUpdateShopInfoDto | null> {
+        try {
+            return this.shopInfoService.findOne(Number(id));
+        } catch (error) {
+            throw new UnauthorizedException('Invalid shop ID format');
+        }
+    }
+
     
     @ApiOperation({ 
         summary: 'อัพเดทข้อมูลร้านค้า', 

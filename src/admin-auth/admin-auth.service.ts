@@ -111,7 +111,6 @@ export class AdminAuthService {
             
             // ถ้าเหลือเวลาน้อยกว่า 10 นาที (600 วินาที)
             const TEN_MINUTES = 10 * 60;
-            
             if (timeLeft > 0 && timeLeft < TEN_MINUTES) {
                 // ดึงข้อมูล user เพื่อสร้าง token ใหม่
                 const user = await this.getUserById(decoded.sub);
