@@ -30,13 +30,17 @@ export class ShopInfoService {
         if (file) {
             createShopInfoDto.shopUploadFile = await this.fileUploadToFirebase(file);
         }
-        
-        const id = await this.shopInfoRepository.create({
-            ...createShopInfoDto,
-            createdBy: userId,
-            updatedBy: userId,
-        });
-        return { id };
+        try{
+            const id = await this.shopInfoRepository.create({
+                ...createShopInfoDto,
+                createdBy: userId,
+                updatedBy: userId,
+            });
+            return { id };
+        }catch(error){
+            console.error('Error creating shop info:', error);
+            throw new UnauthorizedException(error.message || 'Failed to create shop info');
+        }
     }
 
     async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<ResponseShopInfoDto>> {

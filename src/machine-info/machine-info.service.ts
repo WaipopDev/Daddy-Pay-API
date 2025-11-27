@@ -76,7 +76,7 @@ export class MachineInfoService {
         return plainToInstance(ResponseMachineInfoDto, machine, { excludeExtraneousValues: true });
     }
 
-    async update(id: number, updateMachineInfoDto: UpdateMachineInfoDto, userId: number): Promise<{ message: string }> {
+    async update(id: number, updateMachineInfoDto: UpdateMachineInfoDto, userId: number, file?: Express.Multer.File): Promise<{ message: string }> {
         const existingMachine = await this.machineInfoRepository.findMachineInfoById(id);
         if (!existingMachine) {
             throw new BadRequestException('Machine not found');
@@ -90,6 +90,23 @@ export class MachineInfoService {
             }
         }
 
+        if (file) {
+            try {
+                // Validate file
+                FileValidationService.validateFile(file, {
+                    maxSize: 10 * 1024 * 1024, // 10MB
+                    allowedTypes: ['image/jpeg', 'image/png', 'image/jpg'],
+                    allowedExtensions: ['.jpg', '.jpeg', '.png']
+                });
+
+                const fileName = FileValidationService.generateUniqueFileName(file.originalname, 'machine');
+                const fileUrl = await this.firebaseService.uploadFile(file.buffer, fileName, 'machine-files');
+                updateMachineInfoDto.machinePicturePath = fileUrl;
+            } catch (error) {
+                console.error('Error uploading file to Firebase:', error);
+                throw new UnauthorizedException(error.message || 'Failed to upload file');
+            }
+        }
         await this.machineInfoRepository.update(id, {
             ...updateMachineInfoDto,
             updatedBy: userId,

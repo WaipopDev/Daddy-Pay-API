@@ -11,6 +11,7 @@ import { User } from 'src/decorators/user.decorator';
 import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
 import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
+import { getErrorMessage } from 'src/utility/error-handler.util';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
 
@@ -58,8 +59,12 @@ export class ShopInfoController {
             shopBankName: createShopInfoMultipartDto.shopBankName,
             shopBankBranch: createShopInfoMultipartDto.shopBankBranch,
         };
-        
-        return this.shopInfoService.create(createShopInfoDto, userId, file);
+        try{
+            return await this.shopInfoService.create(createShopInfoDto, userId, file);
+        }catch(error){
+            const errorMessage = getErrorMessage(error, 'Failed to create shop info');
+            throw new UnauthorizedException(errorMessage);
+        }
     }
 
     @ApiOperation({ 

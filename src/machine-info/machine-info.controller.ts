@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, UseInterceptors, UploadedFile, Query, BadRequestException, ClassSerializerInterceptor } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, UseInterceptors, UploadedFile, Query, BadRequestException, ClassSerializerInterceptor, UnauthorizedException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MachineInfoService } from './machine-info.service';
 import { CreateMachineInfoDto } from './dto/create-machine-info.dto';
@@ -13,6 +13,7 @@ import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
+import { getErrorMessage } from 'src/utility/error-handler.util';
 
 @ApiTags('Machine Info')
 @ApiBearerAuth()
@@ -98,13 +99,27 @@ export class MachineInfoController {
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลเครื่อง' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        description: 'Machine information with file upload',
+        type: UpdateMachineInfoDto,
+    })
+    @HttpCode(HttpStatus.OK)
     @Patch(':id')
-    async update(@Param('id') encodedId: string, @Body() updateMachineInfoDto: UpdateMachineInfoDto, @User() userId: number) {
+    @UseInterceptors(FileInterceptor('machinePictureFile'))
+    async update(
+        @Param('id') encodedId: string, 
+        @User() userId: number,
+        @Body() updateMachineInfoDto: UpdateMachineInfoDto, 
+        @UploadedFile() file?: Express.Multer.File,
+    ) {
         try {
             const id = IdEncoderService.decode(encodedId);
-            return this.machineInfoService.update(id, updateMachineInfoDto, userId);
+            console.log('updateMachineInfoDto', updateMachineInfoDto)
+            return await this.machineInfoService.update(id, updateMachineInfoDto, userId, file);
         } catch (error) {
-            throw new BadRequestException('Invalid machine ID format');
+            const errorMessage = getErrorMessage(error, 'Failed to update machine info');
+            throw new UnauthorizedException(errorMessage);
         }
     }
 
