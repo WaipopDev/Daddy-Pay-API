@@ -115,7 +115,6 @@ export class MachineInfoController {
     ) {
         try {
             const id = IdEncoderService.decode(encodedId);
-            console.log('updateMachineInfoDto', updateMachineInfoDto)
             return await this.machineInfoService.update(id, updateMachineInfoDto, userId, file);
         } catch (error) {
             const errorMessage = getErrorMessage(error, 'Failed to update machine info');
