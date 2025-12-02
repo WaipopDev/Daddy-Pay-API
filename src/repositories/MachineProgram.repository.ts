@@ -9,20 +9,20 @@ import { ProgramInfoEntity } from 'src/models/entities/ProgramInfo.entity';
 @Injectable()
 export class MachineProgramRepository {
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
-    
+
     private get repo() {
         return this.db.getRepository(MachineProgramEntity);
     }
 
-     private get repoProgramInfo() {
+    private get repoProgramInfo() {
         return this.db.getRepository(ProgramInfoEntity);
     }
 
     async findByMachine(machineInfoId: number): Promise<ProgramInfoEntity[]> {
         return this.repoProgramInfo.find({
-            where: { 
-                machineInfoId, 
-                deletedAt: IsNull() 
+            where: {
+                machineInfoId,
+                deletedAt: IsNull()
             },
             order: {
                 programName: 'ASC'
@@ -42,7 +42,7 @@ export class MachineProgramRepository {
 
     async findAll(idMachine: number, idShop: number): Promise<MachineProgramEntity[]> {
         return this.repo.find({
-            where: { 
+            where: {
                 machineInfoId: idMachine,
                 shopInfoId: idShop,
                 deletedAt: IsNull()
@@ -53,11 +53,15 @@ export class MachineProgramRepository {
                 machineProgramPrice: true,
                 machineProgramOperationTime: true,
                 machineProgramStatus: true,
-                programInfo:{
+                sort: true,
+                programInfo: {
                     id: true,
                     programName: true,
                     programDescription: true
                 }
+            },
+            order: {
+                sort: 'ASC'
             },
             relations: {
                 programInfo: true
@@ -82,6 +86,10 @@ export class MachineProgramRepository {
         );
     }
 
+    async updateMachineProgram(id: number, updateData: Partial<MachineProgramEntity>): Promise<void> {
+        await this.repo.update({ id }, updateData);
+    }
+
     async isMachineProgramKeyUnique(machineProgramKey: string, excludeId?: number): Promise<boolean> {
         const query = this.repo.createQueryBuilder('mp')
             .where('mp.machineProgramKey = :machineProgramKey', { machineProgramKey })
@@ -98,7 +106,7 @@ export class MachineProgramRepository {
     async generateUniqueMachineProgramKey(): Promise<string> {
         let isUnique = false;
         let machineProgramKey = '';
-        
+
         while (!isUnique) {
             machineProgramKey = `MP-${KeyGeneratorService.generateRandomKey(8)}`;
             isUnique = await this.isMachineProgramKeyUnique(machineProgramKey);

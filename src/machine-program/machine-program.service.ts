@@ -12,7 +12,8 @@ import {
     ResponseProgramInfoDto,
     ResponseMachineInfoDto,
     ResponseMachineProgramDto,
-    ResponseMachineProgramAllDto
+    ResponseMachineProgramAllDto,
+    UpdateMachineProgramDto
 } from './dto/machine-program.dto';
 import { CreateMachineProgramDto } from './dto/create-machine-program.dto';
 
@@ -126,6 +127,19 @@ export class MachineProgramService {
         }
 
         return plainToInstance(ResponseProgramInfoDto, programInfo, {
+            excludeExtraneousValues: true
+        });
+    }
+
+    async update(id: number, updateMachineProgramDto: UpdateMachineProgramDto): Promise<ResponseMachineProgramDto> {
+        const machineProgram = await this.machineProgramRepository.findMachineProgramById(id);
+        if (!machineProgram) {
+            throw new NotFoundException('Machine program not found');
+        }
+
+        const updatedMachineProgram = await this.machineProgramRepository.updateMachineProgram(id, updateMachineProgramDto);
+
+        return plainToInstance(ResponseMachineProgramDto, updatedMachineProgram, {
             excludeExtraneousValues: true
         });
     }

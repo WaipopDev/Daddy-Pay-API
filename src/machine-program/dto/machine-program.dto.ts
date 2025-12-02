@@ -14,7 +14,7 @@ import {
     MaxLength,
     IsDecimal,
     IsPositive,
-  } from 'class-validator';
+} from 'class-validator';
 import { EncodeId } from "src/utility/id-encoder.decorators";
 
 export class ProgramMachineDTO {
@@ -223,6 +223,28 @@ export class MachineProgramResponseDto {
 }
 
 
+export class UpdateMachineProgramDto {
+    @ApiPropertyOptional({ description: 'Machine program price' })
+    @IsOptional()
+    @IsNumber()
+    machineProgramPrice?: number;
+
+    @ApiPropertyOptional({ description: 'Machine program operation time in minutes' })
+    @IsOptional()
+    @IsNumber()
+    machineProgramOperationTime?: number;
+
+    @ApiPropertyOptional({ description: 'Machine program status' })
+    @IsOptional()
+    @IsString()
+    machineProgramStatus?: string;
+
+    @ApiPropertyOptional({ description: 'Sort order' })
+    @IsOptional()
+    @IsNumber()
+    sort?: number;
+}
+
 export class ResponseShopInfoDto {
     @ApiProperty({ description: 'Shop ID (encoded)' })
     @Expose()
@@ -299,6 +321,10 @@ export class ResponseMachineProgramAllDto {
     @ApiProperty({ description: 'Machine program status' })
     @Expose()
     machineProgramStatus: string;
+
+    @ApiProperty({ description: 'Sort' })
+    @Expose()
+    sort: number;
 
     @ApiProperty({ description: 'Program information', type: ResponseProgramInfoByAllDto })
     @Expose()

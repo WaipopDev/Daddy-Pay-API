@@ -9,7 +9,7 @@ import { KeyGeneratorService } from 'src/utility/key-generator.service';
 
 export class ProgramInfoRepository {
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
-    
+
     private get repo() {
         return this.db.getRepository(ProgramInfoEntity);
     }
@@ -74,6 +74,8 @@ export class ProgramInfoRepository {
         );
     }
 
+
+
     async findAllProgramInfo(options: IPaginationOptions, sort?: SortDto): Promise<Pagination<ResponseProgramInfoListDto>> {
         const queryBuilder = this.repo.createQueryBuilder('program_info')
             .leftJoinAndSelect('program_info.machineInfo', 'machine_info')
@@ -81,7 +83,7 @@ export class ProgramInfoRepository {
             .select([
                 'program_info.id',
                 'program_info.programKey',
-                'program_info.machineInfoId', 
+                'program_info.machineInfoId',
                 'program_info.programName',
                 'program_info.programDescription',
                 'program_info.createdAt',
@@ -111,7 +113,7 @@ export class ProgramInfoRepository {
                 'program_info.id',
                 'program_info.programKey',
                 'program_info.machineInfoId',
-                'program_info.programName', 
+                'program_info.programName',
                 'program_info.programDescription',
                 'program_info.createdAt',
                 'program_info.createdBy',
@@ -159,5 +161,5 @@ export class ProgramInfoRepository {
         }
     }
 
-   
+
 }

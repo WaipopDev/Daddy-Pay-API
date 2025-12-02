@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, HttpCode, HttpStatus, Param, Query, UnauthorizedException, UseGuards, UseInterceptors, ClassSerializerInterceptor, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpCode, HttpStatus, Param, Query, UnauthorizedException, UseGuards, UseInterceptors, ClassSerializerInterceptor, Delete, Patch } from '@nestjs/common';
 import { MachineProgramService } from './machine-program.service';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
-import { MachineProgramResponseDto, ResponseMachineProgramAllDto, ResponseMachineProgramDto } from './dto/machine-program.dto';
+import { MachineProgramResponseDto, ResponseMachineProgramAllDto, ResponseMachineProgramDto, UpdateMachineProgramDto } from './dto/machine-program.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { User } from 'src/decorators/user.decorator';
@@ -75,6 +75,33 @@ export class MachineProgramController {
             throw new UnauthorizedException('Invalid machine or shop ID format');
         }
         return this.machineProgramService.findAll(idMachine, idShop);
+    }
+
+    @ApiOperation({
+        summary: 'อัปเดตข้อมูลโปรแกรม',
+        description: 'API สำหรับอัปเดตข้อมูลโปรแกรมตาม ID ที่เข้ารหัสแล้ว'
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลโปรแกรม' })
+    @HttpCode(HttpStatus.OK)
+    @Patch(':id')
+    async update(
+        @Param('id') encodedId: string,
+        @Body() updateMachineProgramDto: UpdateMachineProgramDto
+    ): Promise<ResponseMachineProgramDto> {
+        try {
+            const id = IdEncoderService.decode(encodedId);
+            if (!id) {
+                throw new UnauthorizedException('Invalid program ID format');
+            }
+            return await this.machineProgramService.update(id, updateMachineProgramDto);
+        } catch (error) {
+            if (error.message.includes('Failed to decode')) {
+                throw new UnauthorizedException('Invalid program ID format');
+            }
+            throw error;
+        }
     }
 
     @ApiOperation({

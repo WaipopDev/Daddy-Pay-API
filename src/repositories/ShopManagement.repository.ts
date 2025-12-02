@@ -10,7 +10,7 @@ import { MachineProgramEntity } from 'src/models/entities/MachineProgram.entity'
 
 export class ShopManagementRepository {
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
-    
+
     private get repo() {
         return this.db.getRepository(ShopManagementEntity);
     }
@@ -77,7 +77,7 @@ export class ShopManagementRepository {
 
     async findAll(option: PaginationDto, sort: SortDto, query: { shopId?: string }): Promise<Pagination<ShopManagementEntity>> {
         const queryBuilder = this.repo.createQueryBuilder('shopManagement');
-        
+
         queryBuilder.select([
             'shopManagement.id',
             'shopManagement.shopManagementKey',
@@ -127,7 +127,7 @@ export class ShopManagementRepository {
     }
 
     async findById(id: number): Promise<ShopManagementEntity | null> {
-        return this.repo.findOne({ 
+        return this.repo.findOne({
             where: { id, deletedAt: IsNull() },
             relations: ['shopInfo', 'machineInfo']
         });
@@ -140,7 +140,7 @@ export class ShopManagementRepository {
                 shopManagementIotID: Like(`%${idIoT}%`),
                 deletedAt: IsNull()
             },
-            select:{
+            select: {
                 id: true,
                 shopManagementKey: true,
                 shopManagementName: true,
@@ -158,17 +158,17 @@ export class ShopManagementRepository {
 
             }
         });
-        
+
     }
 
-    async findProgramByIdIoT(idIoT: string): Promise<{machineProgram: ResponseMachineProgramDto[], shopManagement: ShopManagementEntity | null}> {
+    async findProgramByIdIoT(idIoT: string): Promise<{ machineProgram: ResponseMachineProgramDto[], shopManagement: ShopManagementEntity | null }> {
 
         const shopManagement = await this.repo.findOne({
             where: {
                 shopManagementIotID: Like(`%${idIoT}%`),
                 deletedAt: IsNull()
             },
-            select:{
+            select: {
                 id: true,
                 shopManagementKey: true,
                 shopManagementName: true,
@@ -184,7 +184,7 @@ export class ShopManagementRepository {
             }
         });
         if (!shopManagement) {
-            return {machineProgram: [], shopManagement: null};
+            return { machineProgram: [], shopManagement: null };
         }
         const machineProgram = await this.repoMachineProgram.find({
             where: {
@@ -202,6 +202,7 @@ export class ShopManagementRepository {
                 shopInfoId: true,
                 machineInfoId: true,
                 programInfoId: true,
+                sort: true,
                 shopInfo: {
                     id: true,
                     shopKey: true,
@@ -222,9 +223,12 @@ export class ShopManagementRepository {
                     programDescription: true,
                 }
             },
+            order: {
+                sort: 'ASC'
+            },
             relations: ['shopInfo', 'machineInfo', 'programInfo']
         });
-        return {machineProgram, shopManagement};
+        return { machineProgram, shopManagement };
     }
 
     async createShopManagement(data: Partial<ShopManagementEntity>): Promise<ShopManagementEntity> {
