@@ -39,6 +39,9 @@ export class MachineProgramEntity extends DefaultEntity {
     @Column({ name: 'machine_program_status', type: 'varchar', length: 255, nullable: false })
     machineProgramStatus: string;
 
+    @Column({ name: 'sort', type: 'int', nullable: true })
+    sort?: number;
+
     @Column({ name: 'status', type: 'varchar', length: 50, nullable: false, default: 'active' })
     status: string;
 

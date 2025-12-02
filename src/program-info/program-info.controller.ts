@@ -105,7 +105,8 @@ export class ProgramInfoController {
         @User() userId: number
     ): Promise<ResponseProgramInfoDto> {
         try {
-            return await this.programInfoService.update(encodedId, updateProgramInfoDto, userId);
+            const id = IdEncoderService.decode(encodedId);
+            return await this.programInfoService.update(id, updateProgramInfoDto, userId);
         } catch (error) {
             if (error.message.includes('Failed to decode')) {
                 throw new UnauthorizedException('Invalid program ID format');
@@ -125,7 +126,8 @@ export class ProgramInfoController {
     @Delete(':id')
     async remove(@Param('id') encodedId: string, @User() userId: number): Promise<{ message: string }> {
         try {
-            await this.programInfoService.remove(encodedId, userId);
+            const id = IdEncoderService.decode(encodedId);
+            await this.programInfoService.remove(id, userId);
             return { message: 'Program deleted successfully' };
         } catch (error) {
             if (error.message.includes('Failed to decode')) {
