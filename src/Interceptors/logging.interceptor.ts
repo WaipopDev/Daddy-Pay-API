@@ -13,19 +13,19 @@ export class LoggingInterceptor implements NestInterceptor {
     ) { }
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const request: ExtendedRequest = context.switchToHttp().getRequest();
-        this.loggerRepo.logActivity({
-            refId: request['request-id'] || uuidv4(),
-            role: request?.rolePermissions || 'guest',
-            userId: request?.userId != null ? Number(request?.userId) : null,
-            username: request?.username || null,
-            path: request.url,
-            method: request.method,
-            ip: request['user-ip'] || '',
-            referer: request?.headers?.referer || null,
-            token: request.headers?.authorization ? request.headers.authorization.replace('Bearer ', '') : null,
-            payload: _.isEmpty(request.body) ? null : request.body,
-            response: null,
-        });
+        // this.loggerRepo.logActivity({
+        //     refId: request['request-id'] || uuidv4(),
+        //     role: request?.rolePermissions || 'guest',
+        //     userId: request?.userId != null ? Number(request?.userId) : null,
+        //     username: request?.username || null,
+        //     path: request.url,
+        //     method: request.method,
+        //     ip: request['user-ip'] || '',
+        //     referer: request?.headers?.referer || null,
+        //     token: request.headers?.authorization ? request.headers.authorization.replace('Bearer ', '') : null,
+        //     payload: _.isEmpty(request.body) ? null : request.body,
+        //     response: null,
+        // });
 
         request.isLogger = true;
 
