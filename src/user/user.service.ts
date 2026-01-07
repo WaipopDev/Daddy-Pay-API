@@ -1,11 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { UsersRepository } from 'src/repositories/Users.repository';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { SortDto } from './dto/user.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
+import { hashPassword, matchPassword } from 'src/utility/password';
 
 @Injectable()
 export class UserService {
@@ -61,5 +63,22 @@ export class UserService {
 
     remove(id: number) {
         return this.usersRepo.delete(id);
+    }
+
+    async changePassword(userId: number, changePasswordDto: ChangePasswordDto) {
+        const user = await this.usersRepo.findUserById(userId, true);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const isPasswordMatch = await matchPassword(user.password, changePasswordDto.oldPassword);
+        if (!isPasswordMatch) {
+            throw new UnauthorizedException('Current password is incorrect');
+        }
+
+        const hashedNewPassword = await hashPassword(changePasswordDto.newPassword);
+        await this.usersRepo.update(userId, { password: hashedNewPassword });
+        
+        return { message: 'Password changed successfully' };
     }
 }

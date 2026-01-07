@@ -2,11 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Cla
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { SortDto } from './dto/user.dto';
+import { User } from 'src/decorators/user.decorator';
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -43,6 +45,18 @@ export class UserController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.userService.findOne(+id);
+    }
+
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @Patch('change-password')
+    changePassword(@User() userId: number, @Body() changePasswordDto: ChangePasswordDto) {
+        try {
+            return this.userService.changePassword(userId, changePasswordDto);
+        } catch (error) {
+            console.log("message", error.message);
+            throw new BadRequestException(error.message);
+        }
     }
 
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
