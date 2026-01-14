@@ -45,6 +45,7 @@ export class DashboardService {
         const convertedDataByMonth = this.convertDataForChartByMonth(graphDataByMonth);
         
         const graphDataByYear = await this.dashboardRepo.findAllGraphDataByYear(branchIdDecoded);
+  
         const convertedDataByYear = this.convertDataForChartByYear(graphDataByYear);
         return {
             branchTotalSale: branchTotalSale,
@@ -220,17 +221,18 @@ export class DashboardService {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         monthLabels.push(...monthNames);
 
-        // Get the start and end of last year
-        const lastYearStart = moment.utc().subtract(1, 'year').startOf('year');
-        const lastYearEnd = moment.utc().subtract(1, 'year').endOf('year');
+        // Get the start and end of last year using Asia/Bangkok timezone to match repository
+        const lastYearStart = moment.tz('Asia/Bangkok').subtract(1, 'year').startOf('year');
+        const lastYearEnd = moment.tz('Asia/Bangkok').subtract(1, 'year').endOf('year');
         
-        // Get the start and end of this year
-        const thisYearStart = moment.utc().startOf('year');
-        const thisYearEnd = moment.utc().endOf('year');
+        // Get the start and end of this year using Asia/Bangkok timezone to match repository
+        const thisYearStart = moment.tz('Asia/Bangkok').startOf('year');
+        const thisYearEnd = moment.tz('Asia/Bangkok').endOf('year');
 
         // Process each transaction
         data.forEach((transaction) => {
-            const transactionDate = moment(transaction.createdAt);
+            // Use Asia/Bangkok timezone to match the repository query
+            const transactionDate = moment.tz(transaction.createdAt, 'Asia/Bangkok');
             const price = parseFloat(transaction.price) || 0;
             
             // Check if transaction is within last year range
