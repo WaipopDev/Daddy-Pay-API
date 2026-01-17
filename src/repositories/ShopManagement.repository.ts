@@ -1,5 +1,5 @@
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, FindOptionsWhere, IsNull, Like } from 'typeorm';
+import { EntityManager, FindOptionsWhere, IsNull, Like, Not } from 'typeorm';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate';
 
 import { ShopManagementEntity } from 'src/models/entities/ShopManagement.entity';
@@ -285,6 +285,49 @@ export class ShopManagementRepository {
     async checkShopManagementIotIdExists(shopManagementIotID: string): Promise<boolean> {
         const count = await this.repo.count({ where: { shopManagementIotID, deletedAt: IsNull() } });
         return count > 0;
+    }
+
+    async findSoftDeletedByMachineId(shopManagementMachineID: string): Promise<ShopManagementEntity | null> {
+        return this.repo.findOne({
+            where: { shopManagementMachineID, deletedAt: Not(IsNull()) },
+            withDeleted: true
+        });
+    }
+
+    async findSoftDeletedByIotId(shopManagementIotID: string): Promise<ShopManagementEntity | null> {
+        return this.repo.findOne({
+            where: { shopManagementIotID, deletedAt: Not(IsNull()) },
+            withDeleted: true
+        });
+    }
+
+    async updateSoftDeletedUniqueValues(id: number, machineId?: string, iotId?: string): Promise<void> {
+        const updateData: Partial<ShopManagementEntity> = {};
+        const timestamp = Date.now();
+        const suffix = `_deleted_${timestamp}`;
+        const maxLength = 255;
+        
+        if (machineId) {
+            // Truncate original value if needed to ensure total length doesn't exceed 255
+            const maxOriginalLength = maxLength - suffix.length;
+            const truncatedMachineId = machineId.length > maxOriginalLength 
+                ? machineId.substring(0, maxOriginalLength) 
+                : machineId;
+            updateData.shopManagementMachineID = `${truncatedMachineId}${suffix}`;
+        }
+        
+        if (iotId) {
+            // Truncate original value if needed to ensure total length doesn't exceed 255
+            const maxOriginalLength = maxLength - suffix.length;
+            const truncatedIotId = iotId.length > maxOriginalLength 
+                ? iotId.substring(0, maxOriginalLength) 
+                : iotId;
+            updateData.shopManagementIotID = `${truncatedIotId}${suffix}`;
+        }
+        
+        if (Object.keys(updateData).length > 0) {
+            await this.repo.update(id, updateData);
+        }
     }
 
     async generateUniqueShopManagementKey(): Promise<string> {

@@ -35,16 +35,46 @@ export class ShopManagementService {
         }
 
 
-        // Check if machine ID already exists
+        // Check if machine ID already exists (non-deleted)
         const existingMachineId = await this.shopManagementRepository.checkShopManagementMachineIdExists(createShopManagementDto.shopManagementMachineID);
         if (existingMachineId) {
             throw new ConflictException('Shop management machine ID already exists');
         }
 
-        // Check if IoT ID already exists
+        // Check if IoT ID already exists (non-deleted)
         const existingIotId = await this.shopManagementRepository.checkShopManagementIotIdExists(createShopManagementDto.shopManagementIotID);
         if (existingIotId) {
             throw new ConflictException('Shop management IoT ID already exists');
+        }
+
+        // Check for soft-deleted records with the same unique values and update their unique values
+        // This prevents unique constraint violations when creating new records after soft delete
+        // Instead of hard deleting, we change the unique values of soft-deleted records
+        const softDeletedMachineId = await this.shopManagementRepository.findSoftDeletedByMachineId(createShopManagementDto.shopManagementMachineID);
+        const softDeletedIotId = await this.shopManagementRepository.findSoftDeletedByIotId(createShopManagementDto.shopManagementIotID);
+        
+        // Collect records to update (avoid updating the same record twice)
+        const recordsToUpdate = new Map<number, { machineId?: string; iotId?: string }>();
+        
+        if (softDeletedMachineId) {
+            const existing = recordsToUpdate.get(softDeletedMachineId.id) || {};
+            existing.machineId = createShopManagementDto.shopManagementMachineID;
+            recordsToUpdate.set(softDeletedMachineId.id, existing);
+        }
+        
+        if (softDeletedIotId) {
+            const existing = recordsToUpdate.get(softDeletedIotId.id) || {};
+            existing.iotId = createShopManagementDto.shopManagementIotID;
+            recordsToUpdate.set(softDeletedIotId.id, existing);
+        }
+        
+        // Update unique values of soft-deleted records to make room for new records
+        for (const [id, values] of recordsToUpdate.entries()) {
+            await this.shopManagementRepository.updateSoftDeletedUniqueValues(
+                id,
+                values.machineId,
+                values.iotId
+            );
         }
 
         // Generate unique shop management key
@@ -196,8 +226,8 @@ export class ShopManagementService {
             throw new NotFoundException('Shop management not found');
         }
 
-        // await this.shopManagementRepository.softDeleteShopManagement(id);
-        await this.shopManagementRepository.deleteShopManagement(id);
+        await this.shopManagementRepository.softDeleteShopManagement(id);
+        // await this.shopManagementRepository.deleteShopManagement(id);
     }
 
     async findList(): Promise<ResponseShopManagementListDto[]> {
