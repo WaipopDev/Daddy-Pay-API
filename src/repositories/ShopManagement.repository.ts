@@ -137,7 +137,7 @@ export class ShopManagementRepository {
 
         return this.repo.findOne({
             where: {
-                shopManagementIotID: Like(`%${idIoT}%`),
+                shopManagementIotID: Like(`%${idIoT}`),
                 deletedAt: IsNull()
             },
             select: {
@@ -165,7 +165,7 @@ export class ShopManagementRepository {
 
         const shopManagement = await this.repo.findOne({
             where: {
-                shopManagementIotID: Like(`%${idIoT}%`),
+                shopManagementIotID: Like(`%${idIoT}`),
                 deletedAt: IsNull()
             },
             select: {
