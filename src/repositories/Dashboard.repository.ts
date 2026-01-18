@@ -31,10 +31,13 @@ export class DashboardRepository {
         }
         const totalSaleByDay = await salesByDay.getRawMany();
         const salesByWeek = this.repoTransaction.createQueryBuilder('machineTransaction')
+        const startDateWeek = moment.tz('Asia/Bangkok').startOf('isoWeek').toDate();
+        const endDateWeek = moment.tz('Asia/Bangkok').endOf('isoWeek').toDate();
+
         salesByWeek.select('machineTransaction.price as price')
         salesByWeek.where('machineTransaction.deletedAt IS NULL')
-        salesByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: moment(startOfDay).startOf('week').toDate() });
-        salesByWeek.andWhere('machineTransaction.createdAt <= :endDate', { endDate: moment(endOfDay).endOf('week').toDate() });
+        salesByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDateWeek });
+        salesByWeek.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endDateWeek });
         if(permissions.length > 0){
             salesByWeek.andWhere('machineTransaction.shopInfoId IN (:...permissions)', { permissions: permissions });
         }
@@ -76,11 +79,14 @@ export class DashboardRepository {
         const totalSaleByDay = await salesByDay.getRawMany();
         
         const salesByWeek = this.repoTransaction.createQueryBuilder('machineTransaction')
+        const startDateWeek = moment.tz('Asia/Bangkok').startOf('isoWeek').toDate();
+        const endDateWeek = moment.tz('Asia/Bangkok').endOf('isoWeek').toDate();
+
         salesByWeek.select('machineTransaction.price as price')
         salesByWeek.where('machineTransaction.deletedAt IS NULL')
         salesByWeek.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
-        salesByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: moment(startOfDay).startOf('week').toDate() });
-        salesByWeek.andWhere('machineTransaction.createdAt <= :endDate', { endDate: moment(endOfDay).endOf('week').toDate() });
+        salesByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDateWeek });
+        salesByWeek.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endDateWeek });
         const totalSaleByWeek = await salesByWeek.getRawMany();
 
         const salesByMonth = this.repoTransaction.createQueryBuilder('machineTransaction')
