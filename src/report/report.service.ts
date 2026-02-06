@@ -22,13 +22,13 @@ export class ReportService {
     }
     async findBranchIncome(query: ReportBranchIncomeDto, userId: number) {
         const permissions = await this.getPermissions(userId);
-        const transactions = await this.reportRepository.findBranchIncome(query, permissions);
+        const transactions = await this.reportRepository.findBranchIncomeRaw(query, permissions);
         return transactions;
     }
 
     async sumBranchIncome(query: ReportBranchIncomeDto, userId: number) {
         const permissions = await this.getPermissions(userId);
-        const transactions = await this.reportRepository.sumBranchIncome(query, permissions);
+        const transactions = await this.reportRepository.sumBranchIncomeRaw(query, permissions);
         return transactions;
     }
 
