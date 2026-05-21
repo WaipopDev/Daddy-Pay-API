@@ -56,6 +56,13 @@ export class LanguageRepository {
       await ref.set(langName);
    }
 
+   async deleteLanguageFromFirebase(langCode: string): Promise<void> {
+      const database = this.firebaseService.getDatabase();
+      const code = langCode.toUpperCase();
+      await database.ref(`Language/${code}`).remove();
+      await database.ref(`LanguageList/${code}`).remove();
+   }
+
    async findByCode(code: string) {
       try {
          const database = this.firebaseService.getDatabase();

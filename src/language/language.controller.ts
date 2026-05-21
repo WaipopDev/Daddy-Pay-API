@@ -1,8 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { LanguageService } from './language.service';
 import { CreateLanguageListDto, CreateLanguageMainDto } from './dto/create-language.dto';
-import { UpdateLanguageMainDto } from './dto/update-language.dto';
-import { SaveLanguageDto, SaveLanguageResponseDto } from './dto/save-language.dto';
+import {
+    DeleteLanguageResponseDto,
+    SaveLanguageDto,
+    SaveLanguageResponseDto,
+    UpdateLanguageDto,
+    UpdateLanguageResponseDto,
+} from './dto/save-language.dto';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
@@ -64,22 +69,31 @@ export class LanguageController {
         return this.languageService.findList();
     }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.languageService.findOne(+id);
+    @ApiBearerAuth()
+    @UseGuards(AdminAuthGuard)
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: HTTP_STATUS_MESSAGES[404] })
+    @HttpCode(HttpStatus.OK)
+    @Patch(':langCode')
+    update(
+        @Param('langCode') langCode: string,
+        @Body() dto: UpdateLanguageDto,
+    ): Promise<UpdateLanguageResponseDto> {
+        return this.languageService.update(langCode, dto);
     }
 
     @ApiBearerAuth()
     @UseGuards(AdminAuthGuard)
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateLanguageDto: UpdateLanguageMainDto) {
-        return this.languageService.update(+id, updateLanguageDto);
-    }
-
-    @ApiBearerAuth()
-    @UseGuards(AdminAuthGuard)
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.languageService.remove(+id);
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: HTTP_STATUS_MESSAGES[404] })
+    @ApiResponse({ status: 403, description: 'Forbidden' })
+    @HttpCode(HttpStatus.OK)
+    @Delete(':langCode')
+    remove(
+        @Param('langCode') langCode: string,
+    ): Promise<DeleteLanguageResponseDto> {
+        return this.languageService.remove(langCode);
     }
 }

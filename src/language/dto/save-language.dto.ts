@@ -23,6 +23,22 @@ export class SaveLanguageDto {
     translations: Record<string, string>;
 }
 
+export class UpdateLanguageDto {
+    @ApiProperty({ description: 'ชื่อภาษา', example: 'ไทย', maxLength: 100 })
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(100)
+    langName: string;
+
+    @ApiProperty({
+        description: 'ข้อความแปล key-value บันทึกที่ Firebase Language/{langCode}',
+        example: { menu_dashboard: 'Dashboard', button_save: 'บันทึก' },
+    })
+    @IsObject()
+    @IsNotEmpty()
+    translations: Record<string, string>;
+}
+
 export class SaveLanguageResponseDto {
     @ApiProperty({ example: 'Language saved to Firebase successfully.' })
     message: string;
@@ -32,4 +48,23 @@ export class SaveLanguageResponseDto {
 
     @ApiProperty({ example: 'ไทย' })
     langName: string;
+}
+
+export class UpdateLanguageResponseDto {
+    @ApiProperty({ example: 'Language updated successfully.' })
+    message: string;
+
+    @ApiProperty({ example: 'TH' })
+    langCode: string;
+
+    @ApiProperty({ example: 'ไทย' })
+    langName: string;
+}
+
+export class DeleteLanguageResponseDto {
+    @ApiProperty({ example: 'Language deleted successfully.' })
+    message: string;
+
+    @ApiProperty({ example: 'TH' })
+    langCode: string;
 }

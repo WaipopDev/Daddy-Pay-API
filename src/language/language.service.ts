@@ -1,7 +1,12 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateLanguageListDto, CreateLanguageMainDto } from './dto/create-language.dto';
-import { UpdateLanguageMainDto } from './dto/update-language.dto';
-import { SaveLanguageDto, SaveLanguageResponseDto } from './dto/save-language.dto';
+import {
+    DeleteLanguageResponseDto,
+    SaveLanguageDto,
+    SaveLanguageResponseDto,
+    UpdateLanguageDto,
+    UpdateLanguageResponseDto,
+} from './dto/save-language.dto';
 import { LangMainEntity } from 'src/models/entities/LangMain.entity';
 import { LanguageRepository } from 'src/repositories/Language.repository';
 import { LangListEntity } from 'src/models/entities/LangList.entity';
@@ -67,15 +72,45 @@ export class LanguageService {
         };
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} language`;
+    async update(
+        langCode: string,
+        dto: UpdateLanguageDto,
+    ): Promise<UpdateLanguageResponseDto> {
+        const code = langCode.trim().toUpperCase();
+        if (!dto.translations || Object.keys(dto.translations).length === 0) {
+            throw new BadRequestException('Translations must not be empty.');
+        }
+
+        const exists = await this.languageRepository.existsLangCodeInFirebase(code);
+        if (!exists) {
+            throw new NotFoundException('Language code does not exist.');
+        }
+
+        await this.languageRepository.saveLanguageToFirebase(code, dto.translations);
+        await this.languageRepository.saveLanguageListEntryToFirebase(code, dto.langName);
+
+        return {
+            message: 'Language updated successfully.',
+            langCode: code,
+            langName: dto.langName,
+        };
     }
 
-    update(id: number, updateLanguageDto: UpdateLanguageMainDto) {
-        return `This action updates a #${id} language`;
-    }
+    async remove(langCode: string): Promise<DeleteLanguageResponseDto> {
+        const code = langCode.trim().toUpperCase();
+        if (code === 'EN') {
+            throw new ForbiddenException('Language code EN cannot be deleted.');
+        }
+        const exists = await this.languageRepository.existsLangCodeInFirebase(code);
+        if (!exists) {
+            throw new NotFoundException('Language code does not exist.');
+        }
 
-    remove(id: number) {
-        return `This action removes a #${id} language`;
+        await this.languageRepository.deleteLanguageFromFirebase(code);
+
+        return {
+            message: 'Language deleted successfully.',
+            langCode: code,
+        };
     }
 }
