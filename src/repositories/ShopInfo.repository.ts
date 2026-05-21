@@ -372,4 +372,34 @@ export class ShopInfoRepository {
             },
         });
     }
+
+    async findShopsForSubscriptionCron(): Promise<Pick<
+        ShopInfoEntity,
+        | 'id'
+        | 'shopName'
+        | 'shopCode'
+        | 'subRegistrationDate'
+        | 'subExpirationDate'
+        | 'subSubscriptionStatus'
+        | 'subNotificationCycle'
+        | 'subNotifyToEmail'
+    >[]> {
+        return this.repo.find({
+            where: {
+                deletedAt: IsNull(),
+                subRegistrationDate: Not(IsNull()),
+                subExpirationDate: Not(IsNull()),
+            },
+            select: {
+                id: true,
+                shopName: true,
+                shopCode: true,
+                subRegistrationDate: true,
+                subExpirationDate: true,
+                subSubscriptionStatus: true,
+                subNotificationCycle: true,
+                subNotifyToEmail: true,
+            },
+        });
+    }
 }
