@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { CreateAdminAuthDto } from './dto/create-admin-auth.dto';
 import { UpdateAdminAuthDto } from './dto/update-admin-auth.dto';
@@ -7,8 +7,11 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { hashPassword, matchPassword } from 'src/utility/password';
 import { LoginAdminAuthDto, ResponseAdminAuthDto } from './dto/admin-auth.dto';
+import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password.dto';
 import { UsersRepository } from 'src/repositories/Users.repository';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AdminAuthService {
@@ -18,7 +21,10 @@ export class AdminAuthService {
         private usersRepo: UsersRepository,
         private jwtService: JwtService,
         private config: ConfigService,
+        private mailService: MailService,
     ) { }
+
+    private static readonly PASSWORD_RESET_PURPOSE = 'password-reset';
 
     private jwtSign(user: UsersEntity): string {
         const secret = this.config.get<string>('JWT_ADMIN_SECRET');
@@ -64,6 +70,82 @@ export class AdminAuthService {
         return this.db.save(user)
     }
 
+
+    private signPasswordResetToken(user: UsersEntity): string {
+        const secret = this.config.get<string>('JWT_RESET_SECRET');
+        const expire = this.config.get<string>('JWT_RESET_EXPIRE') || '1h';
+
+        if (!secret) {
+            throw new Error('JWT_RESET_SECRET is not configured');
+        }
+
+        return this.jwtService.sign(
+            {
+                sub: user.id.toString(),
+                purpose: AdminAuthService.PASSWORD_RESET_PURPOSE,
+            },
+            {
+                expiresIn: expire,
+                secret,
+                algorithm: 'HS256',
+            } as JwtSignOptions,
+        );
+    }
+
+    private verifyPasswordResetToken(token: string): number {
+        const secret = this.config.get<string>('JWT_RESET_SECRET');
+        if (!secret) {
+            throw new BadRequestException('Password reset is not configured');
+        }
+
+        try {
+            const payload = this.jwtService.verify(token, { secret }) as {
+                sub?: string;
+                purpose?: string;
+            };
+            if (payload.purpose !== AdminAuthService.PASSWORD_RESET_PURPOSE || !payload.sub) {
+                throw new UnauthorizedException('Invalid or expired reset token');
+            }
+            return Number(payload.sub);
+        } catch {
+            throw new UnauthorizedException('Invalid or expired reset token');
+        }
+    }
+
+    async forgotPassword(dto: ForgotPasswordDto): Promise<ForgotPasswordResponseDto> {
+        const user = await this.usersRepo.findUserByUsername(dto.email, false);
+        if (!user) {
+            throw new NotFoundException('Email does not exist in the system.');
+        }
+
+        const token = this.signPasswordResetToken(user);
+        const frontendUrl = this.config.get<string>('FRONTEND_URL') || '';
+        const resetPath =
+            this.config.get<string>('FRONTEND_RESET_PASSWORD_PATH') ||
+            '/reset-password';
+        const resetUrl = frontendUrl
+            ? `${frontendUrl.replace(/\/$/, '')}${resetPath}?token=${encodeURIComponent(token)}`
+            : `token=${token}`;
+
+        await this.mailService.sendPasswordResetEmail(user.email, resetUrl);
+
+        return {
+            message: 'A password reset link has been sent to your email.',
+        };
+    }
+
+    async resetPassword(dto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
+        const userId = this.verifyPasswordResetToken(dto.token);
+        const user = await this.usersRepo.findUserById(userId, false);
+        if (!user || !user.active) {
+            throw new UnauthorizedException('Invalid or expired reset token');
+        }
+
+        const hashedPassword = await hashPassword(dto.newPassword);
+        await this.usersRepo.update(userId, { password: hashedPassword });
+
+        return { message: 'Password has been reset successfully.' };
+    }
 
     async login(loginAdminAuthDto: LoginAdminAuthDto): Promise<ResponseAdminAuthDto> {
         const user = await this.usersRepo.findUserByUsername(loginAdminAuthDto.email, true);

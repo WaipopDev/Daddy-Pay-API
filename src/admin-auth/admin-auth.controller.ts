@@ -4,6 +4,8 @@ import { CreateAdminAuthDto } from './dto/create-admin-auth.dto';
 import { UpdateAdminAuthDto } from './dto/update-admin-auth.dto';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginAdminAuthDto, ResponseAdminAuthDto, RefreshTokenResponseDto } from './dto/admin-auth.dto';
+import { ForgotPasswordDto, ForgotPasswordResponseDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password.dto';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { User } from 'src/decorators/user.decorator';
@@ -32,6 +34,26 @@ export class AdminAuthController {
             throw new UnauthorizedException('Please enter your email and password.');
         }
         return await this.adminAuthService.login(loginAdminAuthDto);
+    }
+
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 404, description: HTTP_STATUS_MESSAGES[404] })
+    @HttpCode(HttpStatus.OK)
+    @Post('forgot-password')
+    forgotPassword(
+        @Body() forgotPasswordDto: ForgotPasswordDto,
+    ): Promise<ForgotPasswordResponseDto> {
+        return this.adminAuthService.forgotPassword(forgotPasswordDto);
+    }
+
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @HttpCode(HttpStatus.OK)
+    @Post('reset-password')
+    resetPassword(
+        @Body() resetPasswordDto: ResetPasswordDto,
+    ): Promise<ResetPasswordResponseDto> {
+        return this.adminAuthService.resetPassword(resetPasswordDto);
     }
 
     @ApiBearerAuth()
