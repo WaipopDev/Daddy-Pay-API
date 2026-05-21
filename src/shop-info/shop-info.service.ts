@@ -12,6 +12,7 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { plainToInstance } from 'class-transformer';
 import { UsersRepository } from 'src/repositories/Users.repository';
 import { UpdateShopOnlinePaymentDto } from './dto/update-shop-online-payment.dto';
+import { UpdateShopSubscriptionDto } from './dto/update-shop-subscription.dto';
 
 @Injectable()
 export class ShopInfoService {
@@ -199,6 +200,44 @@ export class ShopInfoService {
 
         return {
             message: 'บันทึกข้อมูลการชำระเงินออนไลน์สำเร็จ',
+        };
+    }
+
+    async updateSubscription(id: number, body: UpdateShopSubscriptionDto, userId: number) {
+        const shop = await this.shopInfoRepository.findShopInfoById(id);
+        if (!shop) {
+            throw new NotFoundException('Shop info not found');
+        }
+
+        const updateData: Partial<ShopInfoEntity> = {
+            subSubscriptionStatus: body.subSubscriptionStatus,
+            updatedBy: userId,
+        };
+
+        if (body.subRegistrationDate !== undefined) {
+            updateData.subRegistrationDate = body.subRegistrationDate
+                ? new Date(body.subRegistrationDate)
+                : null;
+        }
+
+        if (body.subExpirationDate !== undefined) {
+            updateData.subExpirationDate = body.subExpirationDate
+                ? new Date(body.subExpirationDate)
+                : null;
+        }
+
+        if (body.subNotificationCycle !== undefined) {
+            updateData.subNotificationCycle = body.subNotificationCycle;
+        }
+
+        if (body.subNotifyToEmail !== undefined) {
+            updateData.subNotifyToEmail = body.subNotifyToEmail;
+        }
+
+        await this.shopInfoRepository.update(id, updateData);
+
+        return {
+            message: 'บันทึกข้อมูลการสมัครสมาชิกสำเร็จ',
         };
     }
 }

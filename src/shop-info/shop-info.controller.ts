@@ -11,6 +11,7 @@ import { User } from 'src/decorators/user.decorator';
 import { QueryShopInfoDto, ResponseShopInfoListDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
 import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
 import { UpdateShopOnlinePaymentDto } from './dto/update-shop-online-payment.dto';
+import { UpdateShopSubscriptionDto } from './dto/update-shop-subscription.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { getErrorMessage } from 'src/utility/error-handler.util';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -231,5 +232,25 @@ export class ShopInfoController {
             throw new UnauthorizedException('Invalid shop ID format');
         }
         return this.shopInfoService.updateOnlinePayment(id, body, userId);
+    }
+
+    @ApiOperation({
+        summary: 'อัพเดทข้อมูลการสมัครสมาชิก',
+        description: 'อัพเดท subRegistrationDate, subExpirationDate, subSubscriptionStatus, subNotificationCycle, subNotifyToEmail',
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
+    @Patch('subscription/:id')
+    updateSubscription(
+        @User() userId: number,
+        @Param('id') encodedId: string,
+        @Body() body: UpdateShopSubscriptionDto,
+    ) {
+        const id = IdEncoderService.decode(encodedId);
+        if (!id) {
+            throw new UnauthorizedException('Invalid shop ID format');
+        }
+        return this.shopInfoService.updateSubscription(id, body, userId);
     }
 }
