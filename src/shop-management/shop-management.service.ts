@@ -1,13 +1,23 @@
-import { Injectable, NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
 import { CreateShopManagementDto } from './dto/create-shop-management.dto';
 import { UpdateShopManagementDto } from './dto/update-shop-management.dto';
-import { ResponseShopManagementDto, ResponseShopManagementListDto, QueryShopManagementDto, ShopManagementPaginationDto } from './dto/shop-management.dto';
+import {
+    QueryShopManagementTransactionsDto,
+    ResponseShopManagementDto,
+    ResponseShopManagementListDto,
+    QueryShopManagementDto,
+    ShopManagementPaginationDto,
+    ShopManagementMachineTransactionPaginationDto,
+    ResponseShopManagementMachineTransactionDto,
+} from './dto/shop-management.dto';
 import { ShopManagementRepository } from 'src/repositories/ShopManagement.repository';
 import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 import { MachineInfoRepository } from 'src/repositories/MachineInfo.repository';
+import { MachineTransactionRepository } from 'src/repositories/MachineTransaction.repository';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
+import { MachineTransactionEntity } from 'src/models/entities/MachineTransaction.entity';
 
 @Injectable()
 export class ShopManagementService {
@@ -15,7 +25,15 @@ export class ShopManagementService {
         private readonly shopManagementRepository: ShopManagementRepository,
         private readonly shopInfoRepository: ShopInfoRepository,
         private readonly machineInfoRepository: MachineInfoRepository,
+        private readonly machineTransactionRepository: MachineTransactionRepository,
     ) { }
+
+    private mapTransactionPrice(transaction: MachineTransactionEntity): MachineTransactionEntity {
+        if (transaction.priceType === 'force') {
+            transaction.price = 0;
+        }
+        return transaction;
+    }
 
     async create(createShopManagementDto: CreateShopManagementDto, createdBy: number): Promise<ResponseShopManagementDto> {
         // Decode IDs
@@ -140,6 +158,50 @@ export class ShopManagementService {
         return plainToInstance(ResponseShopManagementDto, shopManagement, {
             excludeExtraneousValues: true
         });
+    }
+
+    async findMachineTransactions(
+        shopManagementId: number,
+        query: QueryShopManagementTransactionsDto,
+    ): Promise<ShopManagementMachineTransactionPaginationDto> {
+        const shopManagement = await this.shopManagementRepository.findShopManagementById(
+            shopManagementId,
+        );
+        if (!shopManagement) {
+            throw new NotFoundException('Shop management not found');
+        }
+
+        if (!query.startDate || !query.endDate) {
+            throw new BadRequestException('startDate and endDate are required');
+        }
+
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const result = await this.machineTransactionRepository.findByShopManagementIdPaginated(
+            shopManagementId,
+            query.startDate,
+            query.endDate,
+            { page, limit },
+        );
+
+        const items = result.items.map((item) =>
+            plainToInstance(
+                ResponseShopManagementMachineTransactionDto,
+                this.mapTransactionPrice(item),
+                { excludeExtraneousValues: true },
+            ),
+        );
+
+        return {
+            items,
+            meta: {
+                totalItems: result.meta.totalItems ?? 0,
+                itemCount: result.meta.itemCount ?? 0,
+                itemsPerPage: result.meta.itemsPerPage ?? limit,
+                totalPages: result.meta.totalPages ?? 0,
+                currentPage: result.meta.currentPage ?? page,
+            },
+        };
     }
 
     async update(id: number, updateShopManagementDto: UpdateShopManagementDto, updatedBy: number): Promise<ResponseShopManagementDto> {

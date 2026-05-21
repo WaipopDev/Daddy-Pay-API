@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsNumber, IsOptional } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { ESort } from "src/constants/query.type";
 import { EncodeId } from "src/utility/id-encoder.decorators";
 
@@ -22,6 +23,41 @@ export class SortDto {
   @IsEnum(ESort)
   @IsOptional()
   sort: ESort = ESort.DESC;
+}
+
+export enum ShopStatusFilter {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
+}
+
+export class QueryShopInfoDto extends SortDto {
+  @ApiPropertyOptional({ description: 'หน้าที่', example: 1, default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  page?: number = 1;
+
+  @ApiPropertyOptional({ description: 'จำนวนต่อหน้า', example: 10, default: 10 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  limit?: number = 10;
+
+  @ApiPropertyOptional({ description: 'ค้นหาชื่อร้านค้า' })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+  shopName?: string;
+
+  @ApiPropertyOptional({
+    description: 'สถานะร้านค้า',
+    enum: ShopStatusFilter,
+  })
+  @IsOptional()
+  @IsEnum(ShopStatusFilter)
+  @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+  shopStatus?: ShopStatusFilter;
 }
 
 export class ResponseShopInfoListDto {

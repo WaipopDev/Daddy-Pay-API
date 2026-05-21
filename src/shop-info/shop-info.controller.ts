@@ -8,11 +8,10 @@ import { ApiBearerAuth, ApiResponse, ApiTags, ApiConsumes, ApiBody, ApiQuery, Ap
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { User } from 'src/decorators/user.decorator';
-import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
+import { QueryShopInfoDto, ResponseShopInfoListDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
 import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { getErrorMessage } from 'src/utility/error-handler.util';
-import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
 
 @ApiTags('Shop Info')
@@ -79,10 +78,9 @@ export class ShopInfoController {
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @Get()
     findAll(
-        @Query() option: PaginationDto,
-        @Query() sort: SortDto,
+        @Query() query: QueryShopInfoDto,
     ): Promise<Pagination<ResponseShopInfoDto>> {
-        return this.shopInfoService.findAll(option, sort);
+        return this.shopInfoService.findAll(query);
     }
 
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200], type: ResponseShopInfoListDto, isArray: true })

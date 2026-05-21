@@ -210,7 +210,7 @@ export class ReportRepository {
                 mt.shop_info_id AS "shopInfoId",
                 mt.shop_management_id AS "shopManagementId",
                 mt.price_type AS "priceType",
-                mt.price AS "price",
+                CASE WHEN mt.price_type = 'force' THEN 0 ELSE mt.price END AS "price",
                 mt.created_at AS "createdAt",
                 mt.transaction_id AS "transactionId",
                 mt.transaction_iot AS "transactionIot",
@@ -347,7 +347,9 @@ export class ReportRepository {
         // - join shop_management WITHOUT filtering sm.deleted_at to include soft-deleted
         // - keep other joins filtering deleted_at like before
         const sql = `
-            SELECT SUM(mt.price) AS "totalPrice"
+            SELECT SUM(
+                CASE WHEN mt.price_type = 'force' THEN 0 ELSE mt.price END
+            ) AS "totalPrice"
             FROM machine_transaction mt
             INNER JOIN shop_info si ON si.id = mt.shop_info_id AND si.deleted_at IS NULL
             INNER JOIN machine_info mi ON mi.id = mt.machine_info_id AND mi.deleted_at IS NULL

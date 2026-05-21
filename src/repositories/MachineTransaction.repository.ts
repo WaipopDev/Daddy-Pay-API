@@ -5,6 +5,7 @@ import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginat
 import { MachineTransactionEntity } from 'src/models/entities/MachineTransaction.entity';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
+import moment from 'moment';
 
 export class MachineTransactionRepository {
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
@@ -186,6 +187,75 @@ export class MachineTransactionRepository {
             relations: ['shopInfo', 'machineInfo', 'programInfo', 'machineProgram'],
             order: { createdAt: 'ASC' }
         });
+    }
+
+    async findByShopManagementIdPaginated(
+        shopManagementId: number,
+        startDate: string,
+        endDate: string,
+        option: PaginationDto,
+    ): Promise<Pagination<MachineTransactionEntity>> {
+        const startOfDay = moment.tz(startDate, 'Asia/Bangkok').startOf('day').toDate();
+        const endOfDay = moment.tz(endDate, 'Asia/Bangkok').endOf('day').toDate();
+
+        const queryBuilder = this.repo.createQueryBuilder('machineTransaction');
+
+        queryBuilder.select([
+            'machineTransaction.id',
+            'machineTransaction.shopInfoId',
+            'machineTransaction.shopManagementId',
+            'machineTransaction.machineInfoId',
+            'machineTransaction.programInfoId',
+            'machineTransaction.machineProgramId',
+            'machineTransaction.priceType',
+            'machineTransaction.status',
+            'machineTransaction.transactionId',
+            'machineTransaction.transactionIot',
+            'machineTransaction.errorMessage',
+            'machineTransaction.price',
+            'machineTransaction.createdAt',
+            'machineTransaction.updatedAt',
+            'machineTransaction.createdBy',
+            'machineTransaction.updatedBy',
+            'shopInfo.id',
+            'shopInfo.shopKey',
+            'shopInfo.shopName',
+            'shopInfo.shopCode',
+            'machineInfo.id',
+            'machineInfo.machineKey',
+            'machineInfo.machineType',
+            'machineInfo.machineBrand',
+            'machineInfo.machineModel',
+            'programInfo.id',
+            'programInfo.programKey',
+            'programInfo.programName',
+            'programInfo.programDescription',
+            'machineProgram.id',
+            'machineProgram.machineProgramKey',
+            'machineProgram.machineProgramPrice',
+            'machineProgram.machineProgramOperationTime',
+            'machineProgram.machineProgramStatus',
+        ]);
+
+        queryBuilder.leftJoin('machineTransaction.shopInfo', 'shopInfo');
+        queryBuilder.leftJoin('machineTransaction.machineInfo', 'machineInfo');
+        queryBuilder.leftJoin('machineTransaction.programInfo', 'programInfo');
+        queryBuilder.leftJoin('machineTransaction.machineProgram', 'machineProgram');
+
+        queryBuilder.where('machineTransaction.deletedAt IS NULL');
+        queryBuilder.andWhere('machineTransaction.shopManagementId = :shopManagementId', {
+            shopManagementId,
+        });
+        queryBuilder.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startOfDay });
+        queryBuilder.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endOfDay });
+        queryBuilder.orderBy('machineTransaction.createdAt', 'DESC');
+
+        const paginationOptions: IPaginationOptions = {
+            page: Number(option.page) || 1,
+            limit: Number(option.limit) || 10,
+        };
+
+        return paginate<MachineTransactionEntity>(queryBuilder, paginationOptions);
     }
 
     async findTransactionsByDateRange(startDate: Date, endDate: Date): Promise<MachineTransactionEntity[]> {

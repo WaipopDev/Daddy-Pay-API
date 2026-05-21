@@ -23,7 +23,9 @@ import {
     ResponseShopManagementDto,
     QueryShopManagementDto,
     ShopManagementPaginationDto,
-    ResponseShopManagementListDto
+    ResponseShopManagementListDto,
+    QueryShopManagementTransactionsDto,
+    ShopManagementMachineTransactionPaginationDto,
 } from './dto/shop-management.dto';
 import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
@@ -82,6 +84,35 @@ export class ShopManagementController {
     @Get('list')
     async findList(): Promise<ResponseShopManagementListDto[]> {
         return await this.shopManagementService.findList();
+    }
+
+    @ApiOperation({
+        summary: 'ดึงรายการ machine transaction ตาม shop management',
+        description: 'ดึงรายการธุรกรรมของเครื่องตาม shop management ID พร้อมกรองช่วงวันที่',
+    })
+    @ApiResponse({
+        status: 200,
+        description: HTTP_STATUS_MESSAGES[200],
+        type: ShopManagementMachineTransactionPaginationDto,
+    })
+    @ApiResponse({ status: 400, description: HTTP_STATUS_MESSAGES[400] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลการจัดการร้านค้า' })
+    @HttpCode(HttpStatus.OK)
+    @Get(':id/transactions')
+    async findMachineTransactions(
+        @Param('id') encodedId: string,
+        @Query() query: QueryShopManagementTransactionsDto,
+    ): Promise<ShopManagementMachineTransactionPaginationDto> {
+        try {
+            const id = IdEncoderService.decode(encodedId);
+            return await this.shopManagementService.findMachineTransactions(id, query);
+        } catch (error) {
+            if (error.message?.includes('Failed to decode')) {
+                throw new BadRequestException('Invalid shop management ID format');
+            }
+            throw error;
+        }
     }
 
     @ApiOperation({

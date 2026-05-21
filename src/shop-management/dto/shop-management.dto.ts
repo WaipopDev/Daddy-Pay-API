@@ -278,3 +278,97 @@ export class ShopManagementPaginationDto {
         currentPage: number;
     };
 }
+
+export class QueryShopManagementTransactionsDto {
+    @ApiProperty({ description: 'วันที่เริ่มต้น', example: '2025-01-01' })
+    @IsString()
+    startDate: string;
+
+    @ApiProperty({ description: 'วันที่สิ้นสุด', example: '2025-01-31' })
+    @IsString()
+    endDate: string;
+
+    @ApiPropertyOptional({ description: 'หน้าที่', example: 1, default: 1 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    page?: number = 1;
+
+    @ApiPropertyOptional({ description: 'จำนวนต่อหน้า', example: 10, default: 10 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    limit?: number = 10;
+}
+
+export class ResponseShopManagementMachineTransactionDto {
+    @ApiProperty({ description: 'Transaction ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    id: number;
+
+    @ApiProperty({ description: 'Shop management ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    shopManagementId: number;
+
+    @ApiProperty({ description: 'Price type' })
+    @Expose()
+    priceType: string;
+
+    @ApiProperty({ description: 'Status' })
+    @Expose()
+    status: string;
+
+    @ApiProperty({ description: 'Price' })
+    @Expose()
+    price: number;
+
+    @ApiProperty({ description: 'Transaction ID' })
+    @Expose()
+    transactionId: string;
+
+    @ApiProperty({ description: 'Transaction IoT', required: false })
+    @Expose()
+    transactionIot?: string;
+
+    @ApiProperty({ description: 'Error message', required: false })
+    @Expose()
+    errorMessage?: string;
+
+    @ApiProperty({ description: 'Created at' })
+    @Expose()
+    createdAt: Date;
+
+    @ApiProperty({ description: 'Shop info', type: ResponseShopInfoDto })
+    @Expose()
+    @Type(() => ResponseShopInfoDto)
+    shopInfo: ResponseShopInfoDto;
+
+    @ApiProperty({ description: 'Machine info', type: ResponseMachineInfoDto })
+    @Expose()
+    @Type(() => ResponseMachineInfoDto)
+    machineInfo: ResponseMachineInfoDto;
+
+    @ApiProperty({ description: 'Program info', type: ResponseProgramInfoDto })
+    @Expose()
+    @Type(() => ResponseProgramInfoDto)
+    programInfo: ResponseProgramInfoDto;
+}
+
+export class ShopManagementMachineTransactionPaginationDto {
+    @ApiProperty({
+        description: 'รายการ machine transaction',
+        type: [ResponseShopManagementMachineTransactionDto],
+    })
+    items: ResponseShopManagementMachineTransactionDto[];
+
+    @ApiProperty({ description: 'Pagination metadata' })
+    meta: {
+        totalItems: number;
+        itemCount: number;
+        itemsPerPage: number;
+        totalPages: number;
+        currentPage: number;
+    };
+}

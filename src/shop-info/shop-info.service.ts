@@ -6,7 +6,7 @@ import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { FileValidationService } from 'src/utility/file-validation.service';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
-import { ResponseShopInfoListDto, SortDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
+import { QueryShopInfoDto, ResponseShopInfoListDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { plainToInstance } from 'class-transformer';
@@ -43,9 +43,8 @@ export class ShopInfoService {
         }
     }
 
-    async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<ResponseShopInfoDto>> {
-        // Get the raw entity data using the existing findAll method
-        const result = await this.shopInfoRepository.findAll(option, sort);
+    async findAll(query: QueryShopInfoDto): Promise<Pagination<ResponseShopInfoDto>> {
+        const result = await this.shopInfoRepository.findAll(query);
         
         // Transform each entity to ResponseShopInfoDto using class-transformer
         // This ensures the @EncodeId decorator is properly applied

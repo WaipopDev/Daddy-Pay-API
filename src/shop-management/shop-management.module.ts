@@ -7,6 +7,7 @@ import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 import { MachineInfoRepository } from 'src/repositories/MachineInfo.repository';
 import { ProgramInfoRepository } from 'src/repositories/ProgramInfo.repository';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
+import { MachineTransactionRepository } from 'src/repositories/MachineTransaction.repository';
 
 @Module({
   imports: [AdminAuthModule],
@@ -17,6 +18,7 @@ import { KeyGeneratorService } from 'src/utility/key-generator.service';
     ShopInfoRepository,
     MachineInfoRepository,
     ProgramInfoRepository,
+    MachineTransactionRepository,
     KeyGeneratorService,
   ],
   exports: [ShopManagementService, ShopManagementRepository],

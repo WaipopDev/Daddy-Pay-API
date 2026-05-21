@@ -8,6 +8,8 @@ import _ from 'lodash';
 
 @Injectable()
 export class DashboardRepository {
+    private static readonly EFFECTIVE_PRICE_SQL = `CASE WHEN machineTransaction.price_type = 'force' THEN 0 ELSE machineTransaction.price END`;
+
     constructor(@InjectEntityManager() private readonly db: EntityManager) { }
 
     private get repoTransaction() {
@@ -22,7 +24,7 @@ export class DashboardRepository {
         const endOfDay = moment.tz('Asia/Bangkok').endOf('day').toDate();
 
         const salesByDay = this.repoTransaction.createQueryBuilder('machineTransaction')
-        salesByDay.select('machineTransaction.price as price')
+        salesByDay.select(`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`)
         salesByDay.where('machineTransaction.deletedAt IS NULL')
         salesByDay.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startOfDay });
         salesByDay.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endOfDay });
@@ -34,7 +36,7 @@ export class DashboardRepository {
         const startDateWeek = moment.tz('Asia/Bangkok').startOf('isoWeek').toDate();
         const endDateWeek = moment.tz('Asia/Bangkok').endOf('isoWeek').toDate();
 
-        salesByWeek.select('machineTransaction.price as price')
+        salesByWeek.select(`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`)
         salesByWeek.where('machineTransaction.deletedAt IS NULL')
         salesByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDateWeek });
         salesByWeek.andWhere('machineTransaction.createdAt <= :endDate', { endDate: endDateWeek });
@@ -44,7 +46,7 @@ export class DashboardRepository {
         const totalSaleByWeek = await salesByWeek.getRawMany();
 
         const salesByMonth = this.repoTransaction.createQueryBuilder('machineTransaction')
-        salesByMonth.select('machineTransaction.price as price')
+        salesByMonth.select(`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`)
         salesByMonth.where('machineTransaction.deletedAt IS NULL')
         salesByMonth.andWhere('machineTransaction.createdAt >= :startDate', { startDate: moment(startOfDay).startOf('month').toDate() });
         salesByMonth.andWhere('machineTransaction.createdAt <= :endDate', { endDate: moment(endOfDay).endOf('month').toDate() });
@@ -71,7 +73,7 @@ export class DashboardRepository {
         const endOfDay = moment.tz('Asia/Bangkok').endOf('day').toDate();
 
         const salesByDay = this.repoTransaction.createQueryBuilder('machineTransaction')
-        salesByDay.select('machineTransaction.price as price')
+        salesByDay.select(`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`)
         salesByDay.where('machineTransaction.deletedAt IS NULL')
         salesByDay.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
         salesByDay.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startOfDay });
@@ -82,7 +84,7 @@ export class DashboardRepository {
         const startDateWeek = moment.tz('Asia/Bangkok').startOf('isoWeek').toDate();
         const endDateWeek = moment.tz('Asia/Bangkok').endOf('isoWeek').toDate();
 
-        salesByWeek.select('machineTransaction.price as price')
+        salesByWeek.select(`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`)
         salesByWeek.where('machineTransaction.deletedAt IS NULL')
         salesByWeek.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
         salesByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDateWeek });
@@ -90,7 +92,7 @@ export class DashboardRepository {
         const totalSaleByWeek = await salesByWeek.getRawMany();
 
         const salesByMonth = this.repoTransaction.createQueryBuilder('machineTransaction')
-        salesByMonth.select('machineTransaction.price as price')
+        salesByMonth.select(`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`)
         salesByMonth.where('machineTransaction.deletedAt IS NULL')
         salesByMonth.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
         salesByMonth.andWhere('machineTransaction.createdAt >= :startDate', { startDate: moment(startOfDay).startOf('month').toDate() });
@@ -148,7 +150,7 @@ export class DashboardRepository {
         const startDate = moment.tz('Asia/Bangkok').subtract(1, 'day').startOf('day').toDate();
         const endDate = moment.tz('Asia/Bangkok').endOf('day').toDate();
         const graphDataByDay = this.repoTransaction.createQueryBuilder('machineTransaction')
-        graphDataByDay.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByDay.select([`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`, 'machineTransaction.createdAt as "createdAt"'])
         graphDataByDay.where('machineTransaction.deletedAt IS NULL')
         graphDataByDay.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
         graphDataByDay.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });
@@ -162,7 +164,7 @@ export class DashboardRepository {
         const startDate = moment.tz('Asia/Bangkok').subtract(1, 'week').startOf('isoWeek').toDate();
         const endDate = moment.tz('Asia/Bangkok').endOf('isoWeek').toDate();
         const graphDataByWeek = this.repoTransaction.createQueryBuilder('machineTransaction')
-        graphDataByWeek.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByWeek.select([`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`, 'machineTransaction.createdAt as "createdAt"'])
         graphDataByWeek.where('machineTransaction.deletedAt IS NULL')
         graphDataByWeek.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
         graphDataByWeek.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });
@@ -175,7 +177,7 @@ export class DashboardRepository {
         const startDate = moment.tz('Asia/Bangkok').subtract(1, 'month').startOf('month').toDate();
         const endDate = moment.tz('Asia/Bangkok').endOf('month').toDate();
         const graphDataByMonth = this.repoTransaction.createQueryBuilder('machineTransaction')
-        graphDataByMonth.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByMonth.select([`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`, 'machineTransaction.createdAt as "createdAt"'])
         graphDataByMonth.where('machineTransaction.deletedAt IS NULL')
         graphDataByMonth.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
         graphDataByMonth.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });
@@ -188,7 +190,7 @@ export class DashboardRepository {
         const startDate = moment.tz('Asia/Bangkok').subtract(1, 'year').startOf('year').toDate();
         const endDate = moment.tz('Asia/Bangkok').endOf('year').toDate();
         const graphDataByYear = this.repoTransaction.createQueryBuilder('machineTransaction')
-        graphDataByYear.select(['machineTransaction.price as price', 'machineTransaction.createdAt as "createdAt"'])
+        graphDataByYear.select([`${DashboardRepository.EFFECTIVE_PRICE_SQL} as price`, 'machineTransaction.createdAt as "createdAt"'])
         graphDataByYear.where('machineTransaction.deletedAt IS NULL')
         graphDataByYear.andWhere('machineTransaction.shopInfoId = :branchId', { branchId: branchId });
         graphDataByYear.andWhere('machineTransaction.createdAt >= :startDate', { startDate: startDate });

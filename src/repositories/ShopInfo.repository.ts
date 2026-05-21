@@ -3,7 +3,7 @@ import { EntityManager, FindOptionsWhere, In, IsNull } from 'typeorm';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate';
 
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
-import { ResponseShopInfoListDto, SortDto } from 'src/shop-info/dto/shoo-info.dto';
+import { QueryShopInfoDto, ResponseShopInfoListDto, SortDto } from 'src/shop-info/dto/shoo-info.dto';
 import { PaginationDto } from 'src/constants/pagination.constant';
 import { CreateShopBankDto } from 'src/shop-info/dto/create-shop-info.dto';
 import { ShopBankEntity } from 'src/models/entities/ShopBank.entity';
@@ -64,7 +64,7 @@ export class ShopInfoRepository {
     }
 
 
-    async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<ShopInfoEntity>> {
+    async findAll(query: QueryShopInfoDto): Promise<Pagination<ShopInfoEntity>> {
         const queryBuilder = this.repo.createQueryBuilder('shopInfo');
         
         queryBuilder.select([
@@ -95,14 +95,26 @@ export class ShopInfoRepository {
         ]);
 
         queryBuilder.where('shopInfo.deletedAt IS NULL');
-        // Apply sorting
-        if (sort.column && sort.sort) {
-            queryBuilder.orderBy(`shopInfo.${sort.column}`, sort.sort);
+
+        if (query.shopName) {
+            queryBuilder.andWhere('shopInfo.shopName ILIKE :shopName', {
+                shopName: `%${query.shopName}%`,
+            });
+        }
+
+        if (query.shopStatus) {
+            queryBuilder.andWhere('shopInfo.shopStatus = :shopStatus', {
+                shopStatus: query.shopStatus,
+            });
+        }
+
+        if (query.column && query.sort) {
+            queryBuilder.orderBy(`shopInfo.${query.column}`, query.sort);
         }
 
         const paginationOptions: IPaginationOptions = {
-            page: Number(option.page) || 1,
-            limit: Number(option.limit) || 10,
+            page: Number(query.page || 1) || 1,
+            limit: Number(query.limit || 10) || 10,
         };
 
         return paginate<ShopInfoEntity>(queryBuilder, paginationOptions);
