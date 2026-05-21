@@ -10,6 +10,7 @@ import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { User } from 'src/decorators/user.decorator';
 import { QueryShopInfoDto, ResponseShopInfoListDto, PaginatedShopInfoResponseDto, ResponseShopInfoDto, ResponseShopInfoListUserDto } from './dto/shoo-info.dto';
 import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
+import { UpdateShopOnlinePaymentDto } from './dto/update-shop-online-payment.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { getErrorMessage } from 'src/utility/error-handler.util';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -210,5 +211,25 @@ export class ShopInfoController {
             throw new UnauthorizedException('Invalid shop ID format');
         }
         return this.shopInfoService.createOrUpdateBank(id, body, userId);
+    }
+
+    @ApiOperation({
+        summary: 'อัพเดทข้อมูลการชำระเงินออนไลน์',
+        description: 'อัพเดท onlinePaymentStatus, onlineActivationDate, onlineCloseDate',
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบข้อมูลร้านค้า' })
+    @Patch('online-payment/:id')
+    updateOnlinePayment(
+        @User() userId: number,
+        @Param('id') encodedId: string,
+        @Body() body: UpdateShopOnlinePaymentDto,
+    ) {
+        const id = IdEncoderService.decode(encodedId);
+        if (!id) {
+            throw new UnauthorizedException('Invalid shop ID format');
+        }
+        return this.shopInfoService.updateOnlinePayment(id, body, userId);
     }
 }

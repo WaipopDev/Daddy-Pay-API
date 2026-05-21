@@ -34,6 +34,12 @@ export class IotPaymentService {
         if (!shopInfo) {
             throw new BadRequestException('Shop info not found');
         }
+        if (shopInfo.onlinePaymentStatus !== 'enable') {
+            throw new BadRequestException('Online payment is disabled');
+        }
+        if (shopInfo.subSubscriptionStatus !== 'active') {
+            throw new BadRequestException('Subscription is not active');
+        }
         let bankActive: { MERCHANT_ID: string, PARTNER_ID: string, PARTNER_SECRET: string } = {
             MERCHANT_ID: '',
             PARTNER_ID: '',

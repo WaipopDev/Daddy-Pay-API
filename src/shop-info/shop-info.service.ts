@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateShopBankDto, CreateShopInfoDto } from './dto/create-shop-info.dto';
 import { UpdateShopInfoDto } from './dto/update-shop-info.dto';
 import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
@@ -11,6 +11,7 @@ import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { plainToInstance } from 'class-transformer';
 import { UsersRepository } from 'src/repositories/Users.repository';
+import { UpdateShopOnlinePaymentDto } from './dto/update-shop-online-payment.dto';
 
 @Injectable()
 export class ShopInfoService {
@@ -169,5 +170,35 @@ export class ShopInfoService {
 
     async createOrUpdateBank(id: number, body: CreateShopBankDto, userId: number) {
         return this.shopInfoRepository.createOrUpdateBank(id, body, userId);
+    }
+
+    async updateOnlinePayment(id: number, body: UpdateShopOnlinePaymentDto, userId: number) {
+        const shop = await this.shopInfoRepository.findShopInfoById(id);
+        if (!shop) {
+            throw new NotFoundException('Shop info not found');
+        }
+
+        const updateData: Partial<ShopInfoEntity> = {
+            onlinePaymentStatus: body.onlinePaymentStatus,
+            updatedBy: userId,
+        };
+
+        if (body.onlineActivationDate !== undefined) {
+            updateData.onlineActivationDate = body.onlineActivationDate
+                ? new Date(body.onlineActivationDate)
+                : null;
+        }
+
+        if (body.onlineCloseDate !== undefined) {
+            updateData.onlineCloseDate = body.onlineCloseDate
+                ? new Date(body.onlineCloseDate)
+                : null;
+        }
+
+        await this.shopInfoRepository.update(id, updateData);
+
+        return {
+            message: 'บันทึกข้อมูลการชำระเงินออนไลน์สำเร็จ',
+        };
     }
 }

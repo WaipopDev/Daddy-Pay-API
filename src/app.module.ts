@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { MachineModule } from './machine/machine.module';
 import { MachineProgramModule } from './machine-program/machine-program.module';
@@ -36,6 +37,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
             isGlobal: true,
             envFilePath: ['.env']
         }),
+        ScheduleModule.forRoot(),
         DADDY_PAY_DB,
         AuthModule,
         IotProgramModule,

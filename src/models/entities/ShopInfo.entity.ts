@@ -68,6 +68,30 @@ export class ShopInfoEntity extends DefaultEntity {
     @Column({ name: 'bank_active_id', type: 'int', nullable: true })
     bankActiveId: number;
 
+    @Column({ name: 'online_payment_status', type: 'varchar', length: 20, default: 'enable' })
+    onlinePaymentStatus: string;
+
+    @Column({ name: 'online_activation_date', type: 'date', nullable: true })
+    onlineActivationDate: Date | null;
+
+    @Column({ name: 'online_close_date', type: 'date', nullable: true })
+    onlineCloseDate: Date | null;
+
+    @Column({ name: 'sub_registration_date', type: 'date', nullable: true })
+    subRegistrationDate: Date | null;
+
+    @Column({ name: 'sub_expiration_date', type: 'date', nullable: true })
+    subExpirationDate: Date | null;
+
+    @Column({ name: 'sub_subscription_status', type: 'varchar', length: 20, default: 'active' })
+    subSubscriptionStatus: string;
+
+    @Column({ name: 'sub_notification_cycle', type: 'int', nullable: true })
+    subNotificationCycle: number | null;
+
+    @Column({ name: 'sub_notify_to_email', type: 'text', nullable: true })
+    subNotifyToEmail: string | null;
+
     @OneToOne(() => ShopBankEntity)
     @JoinColumn({ name: 'bank_active_id' })
     bankActive: ShopBankEntity;

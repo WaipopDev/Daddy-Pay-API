@@ -1,5 +1,5 @@
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, FindOptionsWhere, In, IsNull } from 'typeorm';
+import { EntityManager, FindOptionsWhere, In, IsNull, Not } from 'typeorm';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate';
 
 import { ShopInfoEntity } from 'src/models/entities/ShopInfo.entity';
@@ -43,6 +43,14 @@ export class ShopInfoRepository {
                 shopBankAccountNumber: true,
                 shopBankName: true,
                 shopBankBranch: true,
+                onlinePaymentStatus: true,
+                onlineActivationDate: true,
+                onlineCloseDate: true,
+                subRegistrationDate: true,
+                subExpirationDate: true,
+                subSubscriptionStatus: true,
+                subNotificationCycle: true,
+                subNotifyToEmail: true,
                 createdAt: true,
                 updatedAt: true,
                 createdBy: true,
@@ -88,6 +96,14 @@ export class ShopInfoRepository {
             'shopInfo.shopBankAccountNumber',
             'shopInfo.shopBankName',
             'shopInfo.shopBankBranch',
+            'shopInfo.onlinePaymentStatus',
+            'shopInfo.onlineActivationDate',
+            'shopInfo.onlineCloseDate',
+            'shopInfo.subRegistrationDate',
+            'shopInfo.subExpirationDate',
+            'shopInfo.subSubscriptionStatus',
+            'shopInfo.subNotificationCycle',
+            'shopInfo.subNotifyToEmail',
             'shopInfo.createdAt',
             'shopInfo.updatedAt',
             'shopInfo.createdBy',
@@ -296,6 +312,8 @@ export class ShopInfoRepository {
             where: { id },
             select: {
                 id: true,
+                onlinePaymentStatus: true,
+                subSubscriptionStatus: true,
                 bankActiveName: true,
                 bankActiveId: true,
                 bankActive: {
@@ -337,5 +355,21 @@ export class ShopInfoRepository {
         return {
             message: 'บันทึกข้อมูลธนาคารสำเร็จ'
         };
+    }
+
+    async findShopsWithOnlinePaymentDates(): Promise<Pick<ShopInfoEntity, 'id' | 'onlinePaymentStatus' | 'onlineActivationDate' | 'onlineCloseDate'>[]> {
+        return this.repo.find({
+            where: {
+                deletedAt: IsNull(),
+                onlineActivationDate: Not(IsNull()),
+                onlineCloseDate: Not(IsNull()),
+            },
+            select: {
+                id: true,
+                onlinePaymentStatus: true,
+                onlineActivationDate: true,
+                onlineCloseDate: true,
+            },
+        });
     }
 }
