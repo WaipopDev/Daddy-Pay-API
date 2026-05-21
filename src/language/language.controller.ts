@@ -54,7 +54,7 @@ export class LanguageController {
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @HttpCode(HttpStatus.OK)
     @Get()
-    findByCode(@Query('labgCode') langCode: string) {
+    findByCode(@Query('langCode') langCode: string) {
         if(!langCode) {
             return new UnauthorizedException('Language code is required.');
         }
