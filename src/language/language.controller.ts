@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Ht
 import { LanguageService } from './language.service';
 import { CreateLanguageListDto, CreateLanguageMainDto } from './dto/create-language.dto';
 import { UpdateLanguageMainDto } from './dto/update-language.dto';
+import { SaveLanguageDto, SaveLanguageResponseDto } from './dto/save-language.dto';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
@@ -31,6 +32,17 @@ export class LanguageController {
     @Post('list')
     createList(@User() userId: number, @Body() createLanguageListDto: CreateLanguageListDto) {
         return this.languageService.createList(createLanguageListDto, userId);
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(AdminAuthGuard)
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 409, description: 'Conflict' })
+    @HttpCode(HttpStatus.OK)
+    @Post('save')
+    save(@Body() dto: SaveLanguageDto): Promise<SaveLanguageResponseDto> {
+        return this.languageService.save(dto);
     }
 
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })

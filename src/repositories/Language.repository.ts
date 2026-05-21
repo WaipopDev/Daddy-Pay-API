@@ -18,17 +18,42 @@ export class LanguageRepository {
       return this.db.getRepository(LangListEntity);
    }
 
+   async existsLangCodeInFirebase(langCode: string): Promise<boolean> {
+      const database = this.firebaseService.getDatabase();
+      const snapshot = await database
+         .ref(`LanguageList/${langCode.toUpperCase()}`)
+         .once('value');
+      return snapshot.exists();
+   }
+
    async findList() {
       const database = this.firebaseService.getDatabase();
-        const ref = database.ref(`LanguageList`);
-         const snapshot = await ref.once('value');
-         
-         if (!snapshot.exists()) {
-            return null;
-         }
-         
-         const data = snapshot.val();
-         return data
+      const ref = database.ref(`LanguageList`);
+      const snapshot = await ref.once('value');
+
+      if (!snapshot.exists()) {
+         return null;
+      }
+
+      return snapshot.val();
+   }
+
+   async saveLanguageToFirebase(
+      langCode: string,
+      translations: Record<string, string>,
+   ): Promise<void> {
+      const database = this.firebaseService.getDatabase();
+      const ref = database.ref(`Language/${langCode.toUpperCase()}`);
+      await ref.set(translations);
+   }
+
+   async saveLanguageListEntryToFirebase(
+      langCode: string,
+      langName: string,
+   ): Promise<void> {
+      const database = this.firebaseService.getDatabase();
+      const ref = database.ref(`LanguageList/${langCode.toUpperCase()}`);
+      await ref.set(langName);
    }
 
    async findByCode(code: string) {
