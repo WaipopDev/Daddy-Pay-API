@@ -186,6 +186,45 @@ export class DashboardRepository {
         return await graphDataByMonth.getRawMany();
     }
 
+    async findMachineStatusByBranch(branchId: number) {
+        return this.repoShopManagement
+            .createQueryBuilder('shopManagement')
+            .leftJoinAndSelect('shopManagement.machineInfo', 'machineInfo')
+            .where('shopManagement.deletedAt IS NULL')
+            .andWhere('shopManagement.shopInfoID = :branchId', { branchId })
+            .orderBy('shopManagement.id', 'ASC')
+            .getMany();
+    }
+
+    async findLatestActiveTransactionsByShopManagementIds(shopManagementIds: number[]) {
+        if (!shopManagementIds.length) {
+            return [];
+        }
+
+        const latestSubQuery = this.repoTransaction
+            .createQueryBuilder('sub')
+            .select('sub.shop_management_id', 'shop_management_id')
+            .addSelect('MAX(sub.created_at)', 'max_created_at')
+            .where('sub.deleted_at IS NULL')
+            .andWhere('sub.status = :status', { status: 'active' })
+            .andWhere('sub.shop_management_id IN (:...shopManagementIds)', { shopManagementIds })
+            .groupBy('sub.shop_management_id');
+
+        return this.repoTransaction
+            .createQueryBuilder('machineTransaction')
+            .innerJoin(
+                `(${latestSubQuery.getQuery()})`,
+                'latest',
+                'latest.shop_management_id = machineTransaction.shop_management_id AND latest.max_created_at = machineTransaction.created_at',
+            )
+            .setParameters(latestSubQuery.getParameters())
+            .leftJoinAndSelect('machineTransaction.machineProgram', 'machineProgram')
+            .where('machineTransaction.deletedAt IS NULL')
+            .andWhere('machineTransaction.status = :status', { status: 'active' })
+            .andWhere('machineTransaction.shopManagementId IN (:...shopManagementIds)', { shopManagementIds })
+            .getMany();
+    }
+
     async findAllGraphDataByYear(branchId: number) {
         const startDate = moment.tz('Asia/Bangkok').subtract(1, 'year').startOf('year').toDate();
         const endDate = moment.tz('Asia/Bangkok').endOf('year').toDate();

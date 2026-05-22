@@ -3,6 +3,12 @@ import { DashboardRepository } from 'src/repositories/Dashboard.repository';
 import { UsersRepository } from 'src/repositories/Users.repository';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import moment from 'moment';
+import _ from 'lodash';
+import { plainToInstance } from 'class-transformer';
+import {
+    DashboardMachineStatusItemDto,
+    ResponseDashboardMachineStatusDto,
+} from './dto/dashboard.dto';
 @Injectable()
 export class DashboardService {
     constructor(
@@ -28,6 +34,67 @@ export class DashboardService {
         const permissions = await this.getPermissions(userId);
         const machines = await this.dashboardRepo.findAllTotalMachine(permissions);
         return machines;
+    }
+
+    private formatBangkokIso(date?: Date | null): string | null {
+        if (!date) {
+            return null;
+        }
+        return moment.tz(date, 'Asia/Bangkok').format('YYYY-MM-DDTHH:mm:ssZ');
+    }
+
+    async getMachineStatus(branchId: string): Promise<ResponseDashboardMachineStatusDto> {
+        const branchIdDecoded = IdEncoderService.decode(branchId);
+        const machines = await this.dashboardRepo.findMachineStatusByBranch(branchIdDecoded);
+
+        const activeShopManagementIds = machines
+            .filter((machine) => machine.status === 'active')
+            .map((machine) => machine.id);
+
+        const latestTransactions = await this.dashboardRepo.findLatestActiveTransactionsByShopManagementIds(
+            activeShopManagementIds,
+        );
+        const latestTransactionByShopId = new Map(
+            latestTransactions.map((tx) => [tx.shopManagementId, tx]),
+        );
+
+        const summary = {
+            totalMachine: machines.length,
+            totalOnlineActive: _.filter(machines, { shopManagementStatusOnline: 'active' }).length,
+            totalOnlineInactive: _.filter(machines, { shopManagementStatusOnline: 'inactive' }).length,
+            totalOperationalActive: _.filter(machines, { status: 'active' }).length,
+            totalOperationalStandby: _.filter(machines, { status: 'standby' }).length,
+        };
+
+        const items = machines.map((machine) => {
+            const latestTx = machine.status === 'active'
+                ? latestTransactionByShopId.get(machine.id)
+                : undefined;
+
+            return plainToInstance(
+                DashboardMachineStatusItemDto,
+                {
+                    id: machine.id,
+                    shopManagementName: machine.shopManagementName,
+                    shopManagementMachineID: machine.shopManagementMachineID,
+                    shopManagementIotID: machine.shopManagementIotID,
+                    shopManagementStatus: machine.shopManagementStatus,
+                    shopManagementStatusOnline: machine.shopManagementStatusOnline,
+                    status: machine.status,
+                    lastConnect: machine.lastConnect,
+                    errorMessage: machine.errorMessage,
+                    machineType: machine.machineInfo?.machineType ?? '',
+                    machineBrand: machine.machineInfo?.machineBrand ?? '',
+                    machineModel: machine.machineInfo?.machineModel ?? '',
+                    machinePicturePath: machine.machineInfo?.machinePicturePath ?? '',
+                    lastTransactionCreatedAt: this.formatBangkokIso(latestTx?.createdAt),
+                    machineProgramOperationTime: latestTx?.machineProgram?.machineProgramOperationTime ?? null,
+                },
+                { excludeExtraneousValues: true },
+            );
+        });
+
+        return { summary, items };
     }
 
     async getGraphData(branchId: string) {

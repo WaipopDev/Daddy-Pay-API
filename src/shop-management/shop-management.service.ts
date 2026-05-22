@@ -18,6 +18,7 @@ import { MachineInfoRepository } from 'src/repositories/MachineInfo.repository';
 import { MachineTransactionRepository } from 'src/repositories/MachineTransaction.repository';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { MachineTransactionEntity } from 'src/models/entities/MachineTransaction.entity';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class ShopManagementService {
@@ -27,6 +28,21 @@ export class ShopManagementService {
         private readonly machineInfoRepository: MachineInfoRepository,
         private readonly machineTransactionRepository: MachineTransactionRepository,
     ) { }
+
+    private formatBangkokIso(date?: Date | null): string | null {
+        if (!date) {
+            return null;
+        }
+        return moment.tz(date, 'Asia/Bangkok').format('YYYY-MM-DDTHH:mm:ssZ');
+    }
+
+    private mapTransactionForResponse(transaction: MachineTransactionEntity) {
+        const mapped = this.mapTransactionPrice(transaction);
+        return {
+            ...mapped,
+            createdAt: this.formatBangkokIso(mapped.createdAt),
+        };
+    }
 
     private mapTransactionPrice(transaction: MachineTransactionEntity): MachineTransactionEntity {
         if (transaction.priceType === 'force') {
@@ -187,7 +203,7 @@ export class ShopManagementService {
         const items = result.items.map((item) =>
             plainToInstance(
                 ResponseShopManagementMachineTransactionDto,
-                this.mapTransactionPrice(item),
+                this.mapTransactionForResponse(item),
                 { excludeExtraneousValues: true },
             ),
         );

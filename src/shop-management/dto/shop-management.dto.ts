@@ -336,9 +336,12 @@ export class ResponseShopManagementMachineTransactionDto {
     @Expose()
     errorMessage?: string;
 
-    @ApiProperty({ description: 'Created at' })
+    @ApiProperty({
+        description: 'Created at (Asia/Bangkok, ISO +07:00)',
+        example: '2025-05-21T17:30:00+07:00',
+    })
     @Expose()
-    createdAt: Date;
+    createdAt: string;
 
     @ApiProperty({ description: 'Shop info', type: ResponseShopInfoDto })
     @Expose()

@@ -3,7 +3,7 @@ import { DashboardService } from './dashboard.service';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/decorators/user.decorator';
-import { ResponseDashboardSaleDto, ResponseDashboardMachineDto } from './dto/dashboard.dto';
+import { ResponseDashboardSaleDto, ResponseDashboardMachineDto, ResponseDashboardMachineStatusDto } from './dto/dashboard.dto';
 
 @ApiTags('Dashboard')
 @ApiBearerAuth()
@@ -25,6 +25,13 @@ export class DashboardController {
         @User() userId: number
     ): Promise<ResponseDashboardMachineDto> {
         return await this.dashboardService.getTotalMachine(userId);
+    }
+
+    @Get('machine-status/:branchId')
+    async getMachineStatus(
+        @Param('branchId') branchId: string,
+    ): Promise<ResponseDashboardMachineStatusDto> {
+        return await this.dashboardService.getMachineStatus(branchId);
     }
 
     @Get('graph-data/:branchId')
