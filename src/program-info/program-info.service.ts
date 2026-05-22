@@ -1,7 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { IPaginationOptions } from 'nestjs-typeorm-paginate';
-
 import { CreateProgramInfoDto } from './dto/create-program-info.dto';
 import { UpdateProgramInfoDto } from './dto/update-program-info.dto';
 import { ResponseProgramInfoDto, ResponseProgramInfoListDto, QueryProgramInfoDto, ProgramInfoPaginationDto } from './dto/program-info.dto';
@@ -52,22 +50,11 @@ export class ProgramInfoService {
   }
 
   async findAll(query: QueryProgramInfoDto): Promise<ProgramInfoPaginationDto> {
-    const { page = 1, limit = 10, machineId, ...sortOptions } = query;
+    const machineInfoId = query.machineId
+      ? IdEncoderService.decode(query.machineId)
+      : undefined;
 
-    const options: IPaginationOptions = {
-      page,
-      limit
-    };
-
-    let result;
-
-    if (machineId) {
-      // Decode machine ID and filter by it
-      const machineInfoId = IdEncoderService.decode(machineId);
-      result = await this.programInfoRepository.findProgramInfoByMachineId(machineInfoId, options);
-    } else {
-      result = await this.programInfoRepository.findAllProgramInfo(options, sortOptions);
-    }
+    const result = await this.programInfoRepository.findAllProgramInfo(query, machineInfoId);
 
     const items = result.items.map(item =>
       plainToInstance(ResponseProgramInfoListDto, item, { excludeExtraneousValues: true })
@@ -75,7 +62,13 @@ export class ProgramInfoService {
 
     return {
       items,
-      meta: result.meta
+      meta: {
+        totalItems: result.meta.totalItems ?? 0,
+        itemCount: result.meta.itemCount ?? 0,
+        itemsPerPage: result.meta.itemsPerPage ?? 0,
+        totalPages: result.meta.totalPages ?? 0,
+        currentPage: result.meta.currentPage ?? 1,
+      },
     };
   }
 

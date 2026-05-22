@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { IsString, IsOptional, IsEnum, IsDateString, IsNumber } from 'class-validator';
 import { ESort } from 'src/constants/query.type';
 import { EncodeId } from 'src/utility/id-encoder.decorators';
@@ -107,7 +107,26 @@ export class QueryProgramInfoDto extends SortDto {
     @ApiPropertyOptional({ description: 'Machine ID to filter by (encoded)' })
     @IsOptional()
     @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
     machineId?: string;
+
+    @ApiPropertyOptional({ description: 'รหัสโปรแกรม (program key)' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    programName?: string;
+
+    @ApiPropertyOptional({ description: 'ประเภทเครื่อง' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    machineType?: string;
+
+    @ApiPropertyOptional({ description: 'ยี่ห้อเครื่อง' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    machineBrand?: string;
 }
 
 export class ProgramInfoPaginationDto {

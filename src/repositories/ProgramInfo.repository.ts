@@ -3,8 +3,7 @@ import { EntityManager, FindOptionsWhere, IsNull } from 'typeorm';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate';
 
 import { ProgramInfoEntity } from 'src/models/entities/ProgramInfo.entity';
-import { ResponseProgramInfoListDto, SortDto } from '../program-info/dto/program-info.dto';
-import { PaginationDto } from 'src/constants/pagination.constant';
+import { QueryProgramInfoDto, ResponseProgramInfoListDto } from '../program-info/dto/program-info.dto';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
 
 export class ProgramInfoRepository {
@@ -76,7 +75,10 @@ export class ProgramInfoRepository {
 
 
 
-    async findAllProgramInfo(options: IPaginationOptions, sort?: SortDto): Promise<Pagination<ResponseProgramInfoListDto>> {
+    async findAllProgramInfo(
+        query: QueryProgramInfoDto,
+        machineInfoId?: number,
+    ): Promise<Pagination<ResponseProgramInfoListDto>> {
         const queryBuilder = this.repo.createQueryBuilder('program_info')
             .leftJoinAndSelect('program_info.machineInfo', 'machine_info')
             .where('program_info.deleted_at IS NULL')
@@ -96,37 +98,38 @@ export class ProgramInfoRepository {
                 'machine_info.machineBrand',
             ]);
 
-        // Apply sorting
-        if (sort?.column && sort?.sort) {
-            queryBuilder.orderBy(`program_info.${sort.column}`, sort.sort);
+        if (machineInfoId) {
+            queryBuilder.andWhere('program_info.machineInfoId = :machineInfoId', { machineInfoId });
         }
 
-        return paginate<ProgramInfoEntity>(queryBuilder, options);
-    }
+        if (query.programName) {
+            queryBuilder.andWhere('program_info.programName ILIKE :programName', {
+                programName: `%${query.programName}%`,
+            });
+        }
 
-    async findProgramInfoByMachineId(machineInfoId: number, options: IPaginationOptions): Promise<Pagination<ResponseProgramInfoListDto>> {
-        const queryBuilder = this.repo.createQueryBuilder('program_info')
-            .leftJoinAndSelect('program_info.machineInfo', 'machine_info')
-            .where('program_info.deleted_at IS NULL')
-            .andWhere('program_info.machineInfoId = :machineInfoId', { machineInfoId })
-            .select([
-                'program_info.id',
-                'program_info.programKey',
-                'program_info.machineInfoId',
-                'program_info.programName',
-                'program_info.programDescription',
-                'program_info.createdAt',
-                'program_info.createdBy',
-                'program_info.updatedAt',
-                'program_info.updatedBy',
-                'machine_info.id',
-                'machine_info.machineKey',
-                'machine_info.machineType',
-                'machine_info.machineBrand',
-            ])
-            .orderBy('program_info.createdAt', 'DESC');
+        if (query.machineType) {
+            queryBuilder.andWhere('machine_info.machineType ILIKE :machineType', {
+                machineType: `%${query.machineType}%`,
+            });
+        }
 
-        return paginate<ProgramInfoEntity>(queryBuilder, options);
+        if (query.machineBrand) {
+            queryBuilder.andWhere('machine_info.machineBrand ILIKE :machineBrand', {
+                machineBrand: `%${query.machineBrand}%`,
+            });
+        }
+
+        if (query.column && query.sort) {
+            queryBuilder.orderBy(`program_info.${query.column}`, query.sort);
+        }
+
+        const paginationOptions: IPaginationOptions = {
+            page: Number(query.page || 1) || 1,
+            limit: Number(query.limit || 10) || 10,
+        };
+
+        return paginate<ProgramInfoEntity>(queryBuilder, paginationOptions);
     }
 
     async isProgramKeyUnique(programKey: string, excludeId?: number): Promise<boolean> {

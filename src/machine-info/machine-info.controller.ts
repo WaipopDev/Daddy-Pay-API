@@ -8,10 +8,9 @@ import { ApiBearerAuth, ApiResponse, ApiTags, ApiConsumes, ApiBody, ApiQuery, Ap
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
 import { User } from 'src/decorators/user.decorator';
-import { ResponseMachineInfoListDto, SortDto, PaginatedMachineInfoResponseDto, ResponseMachineInfoDto } from './dto/machine-info.dto';
+import { ResponseMachineInfoListDto, QueryMachineInfoDto, PaginatedMachineInfoResponseDto, ResponseMachineInfoDto } from './dto/machine-info.dto';
 import { EncodedIdParamDto } from './dto/encoded-id-param.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
-import { PaginationDto } from 'src/constants/pagination.constant';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { getErrorMessage } from 'src/utility/error-handler.util';
 
@@ -61,10 +60,9 @@ export class MachineInfoController {
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @Get()
     findAll(
-        @Query() option: PaginationDto,
-        @Query() sort: SortDto,
+        @Query() query: QueryMachineInfoDto,
     ): Promise<Pagination<ResponseMachineInfoDto>> {
-        return this.machineInfoService.findAll(option, sort);
+        return this.machineInfoService.findAll(query);
     }
 
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200], type: ResponseMachineInfoListDto, isArray: true })

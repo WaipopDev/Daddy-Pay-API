@@ -6,8 +6,7 @@ import { MachineInfoEntity } from 'src/models/entities/MachineInfo.entity';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { FileValidationService } from 'src/utility/file-validation.service';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
-import { ResponseMachineInfoListDto, SortDto, PaginatedMachineInfoResponseDto, ResponseMachineInfoDto } from './dto/machine-info.dto';
-import { PaginationDto } from 'src/constants/pagination.constant';
+import { ResponseMachineInfoListDto, QueryMachineInfoDto, PaginatedMachineInfoResponseDto, ResponseMachineInfoDto } from './dto/machine-info.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { plainToInstance } from 'class-transformer';
 
@@ -50,8 +49,8 @@ export class MachineInfoService {
 
     
 
-    async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<ResponseMachineInfoDto>> {
-        const result = await this.machineInfoRepository.findAll(option, sort);
+    async findAll(query: QueryMachineInfoDto): Promise<Pagination<ResponseMachineInfoDto>> {
+        const result = await this.machineInfoRepository.findAll(query);
         
         const transformedItems = result.items.map(item => 
             plainToInstance(ResponseMachineInfoDto, item, { excludeExtraneousValues: true })

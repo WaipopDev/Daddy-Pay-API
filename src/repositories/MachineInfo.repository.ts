@@ -3,8 +3,7 @@ import { EntityManager, FindOptionsWhere, IsNull } from 'typeorm';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate';
 
 import { MachineInfoEntity } from 'src/models/entities/MachineInfo.entity';
-import { ResponseMachineInfoListDto, SortDto } from 'src/machine-info/dto/machine-info.dto';
-import { PaginationDto } from 'src/constants/pagination.constant';
+import { QueryMachineInfoDto } from 'src/machine-info/dto/machine-info.dto';
 import { KeyGeneratorService } from 'src/utility/key-generator.service';
 
 export class MachineInfoRepository {
@@ -41,7 +40,7 @@ export class MachineInfoRepository {
         return this.findOneMachineInfo({ id });
     }
 
-    async findAll(option: PaginationDto, sort: SortDto): Promise<Pagination<MachineInfoEntity>> {
+    async findAll(query: QueryMachineInfoDto): Promise<Pagination<MachineInfoEntity>> {
         const queryBuilder = this.repo.createQueryBuilder('machineInfo');
         
         queryBuilder.select([
@@ -60,13 +59,31 @@ export class MachineInfoRepository {
 
         queryBuilder.where('machineInfo.deletedAt IS NULL');
 
-        if (sort.column && sort.sort) {
-            queryBuilder.orderBy(`machineInfo.${sort.column}`, sort.sort);
+        if (query.machineType) {
+            queryBuilder.andWhere('machineInfo.machineType ILIKE :machineType', {
+                machineType: `%${query.machineType}%`,
+            });
+        }
+
+        if (query.machineBrand) {
+            queryBuilder.andWhere('machineInfo.machineBrand ILIKE :machineBrand', {
+                machineBrand: `%${query.machineBrand}%`,
+            });
+        }
+
+        if (query.machineModel) {
+            queryBuilder.andWhere('machineInfo.machineModel ILIKE :machineModel', {
+                machineModel: `%${query.machineModel}%`,
+            });
+        }
+
+        if (query.column && query.sort) {
+            queryBuilder.orderBy(`machineInfo.${query.column}`, query.sort);
         }
 
         const paginationOptions: IPaginationOptions = {
-            page: Number(option.page) || 1,
-            limit: Number(option.limit) || 10,
+            page: Number(query.page || 1) || 1,
+            limit: Number(query.limit || 10) || 10,
         };
 
         return paginate<MachineInfoEntity>(queryBuilder, paginationOptions);

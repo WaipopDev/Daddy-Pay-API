@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
-import { IsString, IsOptional, IsEnum, IsDateString, IsNumber } from 'class-validator';
+import { Expose, Transform, Type } from 'class-transformer';
+import { IsString, IsOptional, IsEnum, IsNumber } from 'class-validator';
 import { EncodeId } from 'src/utility/id-encoder.decorators';
 
 export class ResponseMachineInfoDto {
@@ -101,6 +101,38 @@ export class SortDto {
     @IsOptional()
     @IsEnum(['ASC', 'DESC'])
     sort?: 'ASC' | 'DESC';
+}
+
+export class QueryMachineInfoDto extends SortDto {
+    @ApiPropertyOptional({ description: 'หน้าที่', example: 1, default: 1 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    page?: number = 1;
+
+    @ApiPropertyOptional({ description: 'จำนวนต่อหน้า', example: 10, default: 10 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    limit?: number = 10;
+
+    @ApiPropertyOptional({ description: 'ประเภทเครื่อง' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    machineType?: string;
+
+    @ApiPropertyOptional({ description: 'ยี่ห้อเครื่อง' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    machineBrand?: string;
+
+    @ApiPropertyOptional({ description: 'รุ่นเครื่อง' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    machineModel?: string;
 }
 
 export class PaginatedMachineInfoResponseDto {
