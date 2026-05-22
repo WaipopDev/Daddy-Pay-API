@@ -12,6 +12,7 @@ import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password
 import { UsersRepository } from 'src/repositories/Users.repository';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from 'src/mail/mail.service';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class AdminAuthService {
@@ -25,6 +26,24 @@ export class AdminAuthService {
     ) { }
 
     private static readonly PASSWORD_RESET_PURPOSE = 'password-reset';
+
+    private validateUserSubscription(user: UsersEntity): void {
+        if (!user.subscribe) {
+            return;
+        }
+
+        if (!user.subscribeStartDate || !user.subscribeEndDate) {
+            throw new UnauthorizedException('Subscription is not active');
+        }
+
+        const today = moment.tz('Asia/Bangkok').startOf('day');
+        const start = moment.tz(user.subscribeStartDate, 'Asia/Bangkok').startOf('day');
+        const end = moment.tz(user.subscribeEndDate, 'Asia/Bangkok').startOf('day');
+
+        if (start.isAfter(today) || end.isBefore(today)) {
+            throw new UnauthorizedException('Subscription has expired or not yet started');
+        }
+    }
 
     private jwtSign(user: UsersEntity): string {
         const secret = this.config.get<string>('JWT_ADMIN_SECRET');
@@ -156,6 +175,9 @@ export class AdminAuthService {
         if (!isPasswordMatch) {
             throw new UnauthorizedException('Incorrect password.');
         }
+
+        this.validateUserSubscription(user);
+
         const accessToken = this.jwtSign(user);
         return {
             id: user.id,
@@ -251,6 +273,9 @@ export class AdminAuthService {
         if (!user.isVerified) {
             throw new UnauthorizedException('User not found or inactive.');
         }
+
+        this.validateUserSubscription(user);
+
         return user;
     }
 

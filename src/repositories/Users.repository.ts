@@ -2,8 +2,7 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, FindOptionsWhere } from 'typeorm';
 
 import { UsersEntity } from 'src/models/entities/Users.entity';
-import { PaginationDto } from 'src/constants/pagination.constant';
-import { ResponseUserDto, SortDto } from 'src/user/dto/user.dto';
+import { QueryUserDto, ResponseUserDto } from 'src/user/dto/user.dto';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UsersPermissionsEntity } from 'src/models/entities/UsersPermissions.entity';
@@ -72,7 +71,7 @@ export class UsersRepository {
         return this.repo.find();
     }
 
-    async findAllWithDto(option: PaginationDto, sort: SortDto) {
+    async findAllWithDto(query: QueryUserDto) {
         const queryBuilder = this.repo.createQueryBuilder('users');
         queryBuilder.select([
             'users.id',
@@ -92,12 +91,37 @@ export class UsersRepository {
         ]);
         queryBuilder.where('users.deletedAt IS NULL');
         queryBuilder.andWhere('users.id NOT IN (1,2)');
-        if (sort.column && sort.sort) {
-            queryBuilder.orderBy(`users.${sort.column}`, sort.sort);
+
+        if (query.username) {
+            queryBuilder.andWhere('users.username ILIKE :username', {
+                username: `%${query.username}%`,
+            });
+        }
+
+        if (query.email) {
+            queryBuilder.andWhere('users.email ILIKE :email', {
+                email: `%${query.email}%`,
+            });
+        }
+
+        if (query.subscribe !== undefined) {
+            queryBuilder.andWhere('users.subscribe = :subscribe', {
+                subscribe: query.subscribe,
+            });
+        }
+
+        if (query.isVerified !== undefined) {
+            queryBuilder.andWhere('users.isVerified = :isVerified', {
+                isVerified: query.isVerified,
+            });
+        }
+
+        if (query.column && query.sort) {
+            queryBuilder.orderBy(`users.${query.column}`, query.sort);
         }
         const paginationOptions: IPaginationOptions = {
-            page: Number(option.page) || 1,
-            limit: Number(option.limit) || 10,
+            page: Number(query.page || 1) || 1,
+            limit: Number(query.limit || 10) || 10,
         };
         const result = await paginate<UsersEntity>(queryBuilder, paginationOptions);
         return result;

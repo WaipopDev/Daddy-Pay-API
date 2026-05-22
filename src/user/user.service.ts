@@ -3,11 +3,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UsersRepository } from 'src/repositories/Users.repository';
-import { PaginationDto } from 'src/constants/pagination.constant';
-import { SortDto } from './dto/user.dto';
+import { QueryUserDto } from './dto/user.dto';
 import { IdEncoderService } from 'src/utility/id-encoder.service';
 import { ShopInfoRepository } from 'src/repositories/ShopInfo.repository';
 import { hashPassword, matchPassword } from 'src/utility/password';
+import { UpdateUserSubscribeDto } from './dto/update-user-subscribe.dto';
+import { UsersEntity } from 'src/models/entities/Users.entity';
 
 @Injectable()
 export class UserService {
@@ -49,8 +50,8 @@ export class UserService {
         }
     }
 
-    findAll(option: PaginationDto, sort: SortDto) {
-        return this.usersRepo.findAllWithDto(option, sort);
+    findAll(query: QueryUserDto) {
+        return this.usersRepo.findAllWithDto(query);
     }
 
     findOne(id: number) {
@@ -63,6 +64,36 @@ export class UserService {
 
     remove(id: number) {
         return this.usersRepo.delete(id);
+    }
+
+    async updateSubscribe(id: number, body: UpdateUserSubscribeDto, updatedBy: number) {
+        const user = await this.usersRepo.findUserById(id);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const updateData: Partial<UsersEntity> = {
+            subscribe: body.subscribe,
+            updatedBy,
+        };
+
+        if (body.subscribeStartDate !== undefined) {
+            updateData.subscribeStartDate = body.subscribeStartDate
+                ? new Date(body.subscribeStartDate)
+                : null;
+        }
+
+        if (body.subscribeEndDate !== undefined) {
+            updateData.subscribeEndDate = body.subscribeEndDate
+                ? new Date(body.subscribeEndDate)
+                : null;
+        }
+
+        await this.usersRepo.update(id, updateData);
+
+        return {
+            message: 'บันทึกข้อมูลการสมัครสมาชิกสำเร็จ',
+        };
     }
 
     async changePassword(userId: number, changePasswordDto: ChangePasswordDto) {

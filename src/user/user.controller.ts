@@ -3,11 +3,11 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUserSubscribeDto } from './dto/update-user-subscribe.dto';
 import { AdminAuthGuard } from 'src/guards/AuthAdmin.guard';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { HTTP_STATUS_MESSAGES } from 'src/constants/http-status.constant';
-import { PaginationDto } from 'src/constants/pagination.constant';
-import { SortDto } from './dto/user.dto';
+import { QueryUserDto } from './dto/user.dto';
 import { User } from 'src/decorators/user.decorator';
 
 @ApiTags('User')
@@ -33,11 +33,8 @@ export class UserController {
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
     @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
     @Get()
-    findAll(
-        @Query() option: PaginationDto,
-        @Query() sort: SortDto,
-    ) {
-        return this.userService.findAll(option, sort);
+    findAll(@Query() query: QueryUserDto) {
+        return this.userService.findAll(query);
     }
 
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
@@ -45,6 +42,22 @@ export class UserController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.userService.findOne(+id);
+    }
+
+    @ApiOperation({
+        summary: 'อัพเดทข้อมูลการสมัครสมาชิก',
+        description: 'อัพเดท subscribe, subscribeStartDate, subscribeEndDate',
+    })
+    @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })
+    @ApiResponse({ status: 401, description: HTTP_STATUS_MESSAGES[401] })
+    @ApiResponse({ status: 404, description: 'ไม่พบผู้ใช้' })
+    @Patch('subscribe/:id')
+    updateSubscribe(
+        @User() updatedBy: number,
+        @Param('id') id: string,
+        @Body() body: UpdateUserSubscribeDto,
+    ) {
+        return this.userService.updateSubscribe(+id, body, updatedBy);
     }
 
     @ApiResponse({ status: 200, description: HTTP_STATUS_MESSAGES[200] })

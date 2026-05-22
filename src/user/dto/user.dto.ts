@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Transform, Type } from "class-transformer";
 import { IsArray, IsBoolean, IsDate, IsEmail, IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
 import { ESort } from "src/constants/query.type";
 
@@ -25,6 +26,54 @@ export enum ESortColumn {
     @IsEnum(ESort)
     @IsOptional()
     sort: ESort = ESort.DESC;
+  }
+
+  export class QueryUserDto extends SortDto {
+    @ApiPropertyOptional({ description: 'หน้าที่', example: 1, default: 1 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    page?: number = 1;
+
+    @ApiPropertyOptional({ description: 'จำนวนต่อหน้า', example: 10, default: 10 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    limit?: number = 10;
+
+    @ApiPropertyOptional({ description: 'ค้นหาชื่อผู้ใช้' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    username?: string;
+
+    @ApiPropertyOptional({ description: 'ค้นหาอีเมล' })
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (value === '' || value == null ? undefined : value))
+    email?: string;
+
+    @ApiPropertyOptional({ description: 'Subscription (subscribe)', example: true })
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => {
+      if (value === '' || value == null) return undefined;
+      if (value === 'true' || value === true) return true;
+      if (value === 'false' || value === false) return false;
+      return undefined;
+    })
+    subscribe?: boolean;
+
+    @ApiPropertyOptional({ description: 'Verified', example: true })
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => {
+      if (value === '' || value == null) return undefined;
+      if (value === 'true' || value === true) return true;
+      if (value === 'false' || value === false) return false;
+      return undefined;
+    })
+    isVerified?: boolean;
   }
 
   export class UsersPermissionsDto {
