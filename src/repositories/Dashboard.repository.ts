@@ -225,6 +225,27 @@ export class DashboardRepository {
             .getMany();
     }
 
+    async findLatestTransactionsByShopManagementNames(
+        branchId: number,
+        shopManagementNames: string[],
+    ) {
+        if (!shopManagementNames.length) {
+            return [];
+        }
+
+        return this.repoTransaction
+            .createQueryBuilder('machineTransaction')
+            .leftJoinAndSelect('machineTransaction.machineProgram', 'machineProgram')
+            .innerJoinAndSelect('machineTransaction.shopManagement', 'shopManagement')
+            .where('machineTransaction.deletedAt IS NULL')
+            .andWhere('shopManagement.shopInfoID = :branchId', { branchId })
+            .andWhere('shopManagement.shopManagementName IN (:...shopManagementNames)', {
+                shopManagementNames,
+            })
+            .orderBy('machineTransaction.createdAt', 'DESC')
+            .getMany();
+    }
+
     async findAllGraphDataByYear(branchId: number) {
         const startDate = moment.tz('Asia/Bangkok').subtract(1, 'year').startOf('year').toDate();
         const endDate = moment.tz('Asia/Bangkok').endOf('year').toDate();

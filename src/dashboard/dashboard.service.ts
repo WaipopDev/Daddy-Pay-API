@@ -11,6 +11,8 @@ import {
 } from './dto/dashboard.dto';
 @Injectable()
 export class DashboardService {
+    private static readonly MASSAGE_CHAIR_MACHINE_TYPE = 'เก้าอี้นวดไฟฟ้าหยอดเหรียญ';
+
     constructor(
         private readonly dashboardRepo: DashboardRepository,
         private readonly usersRepository: UsersRepository
@@ -43,20 +45,41 @@ export class DashboardService {
         return moment.tz(date, 'Asia/Bangkok').format('YYYY-MM-DDTHH:mm:ssZ');
     }
 
+    private isMassageChairMachine(machine: { machineInfo?: { machineType?: string } | null }) {
+        return machine.machineInfo?.machineType?.trim() === DashboardService.MASSAGE_CHAIR_MACHINE_TYPE;
+    }
+
     async getMachineStatus(branchId: string): Promise<ResponseDashboardMachineStatusDto> {
         const branchIdDecoded = IdEncoderService.decode(branchId);
         const machines = await this.dashboardRepo.findMachineStatusByBranch(branchIdDecoded);
 
         const activeShopManagementIds = machines
-            .filter((machine) => machine.status === 'active')
+            .filter((machine) => machine.status === 'active' && !this.isMassageChairMachine(machine))
             .map((machine) => machine.id);
+        const massageChairShopManagementNames = machines
+            .filter((machine) => this.isMassageChairMachine(machine))
+            .map((machine) => machine.shopManagementName);
 
-        const latestTransactions = await this.dashboardRepo.findLatestActiveTransactionsByShopManagementIds(
+        const latestActiveTransactions = await this.dashboardRepo.findLatestActiveTransactionsByShopManagementIds(
             activeShopManagementIds,
         );
-        const latestTransactionByShopId = new Map(
-            latestTransactions.map((tx) => [tx.shopManagementId, tx]),
+        const latestMassageChairTransactions = await this.dashboardRepo.findLatestTransactionsByShopManagementNames(
+            branchIdDecoded,
+            massageChairShopManagementNames,
         );
+        const latestActiveTransactionByShopId = new Map(
+            latestActiveTransactions.map((tx) => [tx.shopManagementId, tx]),
+        );
+        const latestMassageChairTransactionByShopId = new Map<
+            string,
+            (typeof latestMassageChairTransactions)[number]
+        >();
+        for (const transaction of latestMassageChairTransactions) {
+            const machineName = transaction.shopManagement.shopManagementName;
+            if (!latestMassageChairTransactionByShopId.has(machineName)) {
+                latestMassageChairTransactionByShopId.set(machineName, transaction);
+            }
+        }
 
         const summary = {
             totalMachine: machines.length,
@@ -67,8 +90,10 @@ export class DashboardService {
         };
 
         const items = machines.map((machine) => {
-            const latestTx = machine.status === 'active'
-                ? latestTransactionByShopId.get(machine.id)
+            const latestTx = this.isMassageChairMachine(machine)
+                ? latestMassageChairTransactionByShopId.get(machine.shopManagementName)
+                : machine.status === 'active'
+                    ? latestActiveTransactionByShopId.get(machine.id)
                 : undefined;
 
             return plainToInstance(
