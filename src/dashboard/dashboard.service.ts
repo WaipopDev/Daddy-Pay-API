@@ -9,6 +9,7 @@ import {
     DashboardMachineStatusItemDto,
     ResponseDashboardMachineStatusDto,
 } from './dto/dashboard.dto';
+import { MachineTransactionEntity } from 'src/models/entities/MachineTransaction.entity';
 @Injectable()
 export class DashboardService {
     private static readonly MASSAGE_CHAIR_MACHINE_TYPE = 'เก้าอี้นวดไฟฟ้าหยอดเหรียญ';
@@ -49,10 +50,46 @@ export class DashboardService {
         return machine.machineInfo?.machineType?.trim() === DashboardService.MASSAGE_CHAIR_MACHINE_TYPE;
     }
 
+    private toEffectivePrice(transaction: MachineTransactionEntity): number {
+        if (transaction.priceType === 'force') {
+            return 0;
+        }
+        return Number(transaction.price);
+    }
+
+    private mapLatestBranchIncomeTransaction(transaction: MachineTransactionEntity) {
+        const createdAt = this.formatBangkokIso(transaction.createdAt);
+        if (!createdAt) {
+            return null;
+        }
+
+        return {
+            id: transaction.id,
+            createdAt,
+            transactionIot: transaction.transactionIot ?? null,
+            transactionId: transaction.transactionId ?? null,
+            priceType: transaction.priceType,
+            price: this.toEffectivePrice(transaction),
+            shopInfo: {
+                shopName: transaction.shopInfo?.shopName ?? '',
+            },
+            machineInfo: {
+                machineType: transaction.machineInfo?.machineType ?? '',
+            },
+            programInfo: {
+                programName: transaction.programInfo?.programName ?? '',
+            },
+            shopManagement: {
+                shopManagementName: transaction.shopManagement?.shopManagementName ?? '',
+            },
+        };
+    }
+
     async getMachineStatus(branchId: string): Promise<ResponseDashboardMachineStatusDto> {
         const branchIdDecoded = IdEncoderService.decode(branchId);
         const machines = await this.dashboardRepo.findMachineStatusByBranch(branchIdDecoded);
 
+        const allShopManagementIds = machines.map((machine) => machine.id);
         const activeShopManagementIds = machines
             .filter((machine) => machine.status === 'active' && !this.isMassageChairMachine(machine))
             .map((machine) => machine.id);
@@ -60,13 +97,22 @@ export class DashboardService {
             .filter((machine) => this.isMassageChairMachine(machine))
             .map((machine) => machine.shopManagementName);
 
-        const latestActiveTransactions = await this.dashboardRepo.findLatestActiveTransactionsByShopManagementIds(
-            activeShopManagementIds,
-        );
-        const latestMassageChairTransactions = await this.dashboardRepo.findLatestTransactionsByShopManagementNames(
-            branchIdDecoded,
-            massageChairShopManagementNames,
-        );
+        const [
+            latestActiveTransactions,
+            latestMassageChairTransactions,
+            latestBranchIncomeTransactions,
+        ] = await Promise.all([
+            this.dashboardRepo.findLatestActiveTransactionsByShopManagementIds(
+                activeShopManagementIds,
+            ),
+            this.dashboardRepo.findLatestTransactionsByShopManagementNames(
+                branchIdDecoded,
+                massageChairShopManagementNames,
+            ),
+            this.dashboardRepo.findLatestBranchIncomeTransactionsByShopManagementIds(
+                allShopManagementIds,
+            ),
+        ]);
         const latestActiveTransactionByShopId = new Map(
             latestActiveTransactions.map((tx) => [tx.shopManagementId, tx]),
         );
@@ -80,6 +126,9 @@ export class DashboardService {
                 latestMassageChairTransactionByShopId.set(machineName, transaction);
             }
         }
+        const latestBranchIncomeByShopId = new Map(
+            latestBranchIncomeTransactions.map((tx) => [tx.shopManagementId, tx]),
+        );
 
         const summary = {
             totalMachine: machines.length,
@@ -95,6 +144,7 @@ export class DashboardService {
                 : machine.status === 'active'
                     ? latestActiveTransactionByShopId.get(machine.id)
                 : undefined;
+            const latestBranchIncomeTx = latestBranchIncomeByShopId.get(machine.id);
 
             return plainToInstance(
                 DashboardMachineStatusItemDto,
@@ -114,6 +164,9 @@ export class DashboardService {
                     machinePicturePath: machine.machineInfo?.machinePicturePath ?? '',
                     lastTransactionCreatedAt: this.formatBangkokIso(latestTx?.createdAt),
                     machineProgramOperationTime: latestTx?.machineProgram?.machineProgramOperationTime ?? null,
+                    latestBranchIncomeTransaction: latestBranchIncomeTx
+                        ? this.mapLatestBranchIncomeTransaction(latestBranchIncomeTx)
+                        : null,
                 },
                 { excludeExtraneousValues: true },
             );

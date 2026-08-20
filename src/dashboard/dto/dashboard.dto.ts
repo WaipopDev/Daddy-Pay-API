@@ -31,6 +31,80 @@ export class ResponseDashboardMachineDto {
     totalMachine: number;
 }
 
+export class DashboardLatestBranchIncomeShopInfoDto {
+    @ApiProperty({ description: 'Shop / branch name' })
+    @Expose()
+    shopName: string;
+}
+
+export class DashboardLatestBranchIncomeMachineInfoDto {
+    @ApiProperty({ description: 'Machine type' })
+    @Expose()
+    machineType: string;
+}
+
+export class DashboardLatestBranchIncomeProgramInfoDto {
+    @ApiProperty({ description: 'Program name' })
+    @Expose()
+    programName: string;
+}
+
+export class DashboardLatestBranchIncomeShopManagementDto {
+    @ApiProperty({ description: 'Machine name' })
+    @Expose()
+    shopManagementName: string;
+}
+
+export class DashboardLatestBranchIncomeTransactionDto {
+    @ApiProperty({ description: 'Transaction ID (encoded)' })
+    @Expose()
+    @EncodeId()
+    id: number;
+
+    @ApiProperty({
+        description: 'Transaction created at (Asia/Bangkok, ISO +07:00)',
+        example: '2025-05-21T17:30:00+07:00',
+    })
+    @Expose()
+    createdAt: string;
+
+    @ApiPropertyOptional({ description: 'IoT transaction reference' })
+    @Expose()
+    transactionIot?: string | null;
+
+    @ApiPropertyOptional({ description: 'Bank transaction reference' })
+    @Expose()
+    transactionId?: string | null;
+
+    @ApiProperty({ description: 'Payment method / price type' })
+    @Expose()
+    priceType: string;
+
+    @ApiProperty({ description: 'Amount (force type returns 0)' })
+    @Expose()
+    price: number;
+
+    @ApiProperty({ type: DashboardLatestBranchIncomeShopInfoDto })
+    @Expose()
+    @Type(() => DashboardLatestBranchIncomeShopInfoDto)
+    shopInfo: DashboardLatestBranchIncomeShopInfoDto;
+
+    @ApiProperty({ type: DashboardLatestBranchIncomeMachineInfoDto })
+    @Expose()
+    @Type(() => DashboardLatestBranchIncomeMachineInfoDto)
+    machineInfo: DashboardLatestBranchIncomeMachineInfoDto;
+
+    @ApiProperty({ type: DashboardLatestBranchIncomeProgramInfoDto })
+    @Expose()
+    @Type(() => DashboardLatestBranchIncomeProgramInfoDto)
+    programInfo: DashboardLatestBranchIncomeProgramInfoDto;
+
+    @ApiProperty({ type: DashboardLatestBranchIncomeShopManagementDto })
+    @Expose()
+    @Type(() => DashboardLatestBranchIncomeShopManagementDto)
+    shopManagement: DashboardLatestBranchIncomeShopManagementDto;
+}
+
 export class DashboardMachineStatusItemDto {
     @ApiProperty({ description: 'Shop management ID (encoded)' })
     @Expose()
@@ -95,6 +169,15 @@ export class DashboardMachineStatusItemDto {
     @ApiPropertyOptional({ description: 'Program operation time in seconds (for countdown)' })
     @Expose()
     machineProgramOperationTime?: number | null;
+
+    @ApiPropertyOptional({
+        description: 'Latest Branch Income transaction for this machine (any status, non-deleted)',
+        type: DashboardLatestBranchIncomeTransactionDto,
+        nullable: true,
+    })
+    @Expose()
+    @Type(() => DashboardLatestBranchIncomeTransactionDto)
+    latestBranchIncomeTransaction?: DashboardLatestBranchIncomeTransactionDto | null;
 }
 
 export class DashboardMachineStatusSummaryDto {

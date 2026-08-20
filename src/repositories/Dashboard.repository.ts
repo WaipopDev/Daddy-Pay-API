@@ -225,6 +225,32 @@ export class DashboardRepository {
             .getMany();
     }
 
+    /**
+     * Latest non-deleted transaction per shop_management id (any status),
+     * with relations needed for Branch Income display fields.
+     * DISTINCT ON + createdAt/id DESC guarantees exactly one deterministic row
+     * even when multiple rows share the same created_at.
+     */
+    async findLatestBranchIncomeTransactionsByShopManagementIds(shopManagementIds: number[]) {
+        if (!shopManagementIds.length) {
+            return [];
+        }
+
+        return this.repoTransaction
+            .createQueryBuilder('machineTransaction')
+            .distinctOn(['machineTransaction.shopManagementId'])
+            .leftJoinAndSelect('machineTransaction.shopInfo', 'shopInfo')
+            .leftJoinAndSelect('machineTransaction.machineInfo', 'machineInfo')
+            .leftJoinAndSelect('machineTransaction.programInfo', 'programInfo')
+            .leftJoinAndSelect('machineTransaction.shopManagement', 'shopManagement')
+            .where('machineTransaction.deletedAt IS NULL')
+            .andWhere('machineTransaction.shopManagementId IN (:...shopManagementIds)', { shopManagementIds })
+            .orderBy('machineTransaction.shopManagementId', 'ASC')
+            .addOrderBy('machineTransaction.createdAt', 'DESC')
+            .addOrderBy('machineTransaction.id', 'DESC')
+            .getMany();
+    }
+
     async findLatestTransactionsByShopManagementNames(
         branchId: number,
         shopManagementNames: string[],
