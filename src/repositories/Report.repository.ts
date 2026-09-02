@@ -404,6 +404,7 @@ export class ReportRepository {
                 ])
                 .innerJoin('shopManagement.shopInfo', 'shopInfo')
                 .where('shopManagement.shopManagementKey = :shopManagementKey', { shopManagementKey: doc.data().reference3 })
+                .withDeleted()
                 .getOne();
                 if(permissions.length > 0){
                     const isPermission = permissions.find(item => item === branchData?.shopInfo.id)
@@ -425,6 +426,7 @@ export class ReportRepository {
                 .innerJoin('machineProgram.machineInfo', 'machineInfo')
                 .innerJoin('machineProgram.programInfo', 'programInfo')
                 .where('machineProgram.machineProgramKey = :machineProgramKey', { machineProgramKey: doc.data().reference1 })
+                .withDeleted()
                 .getOne();
                 defaultDataProgram.push({machineProgramKey: doc.data().reference1, programName: programData?.programInfo.programName || '', machineType: programData?.machineInfo.machineType || ''})
                 findDataProgram = {machineProgramKey: doc.data().reference1, programName: programData?.programInfo.programName || '', machineType: programData?.machineInfo.machineType || ''}
@@ -478,6 +480,7 @@ export class ReportRepository {
                     .innerJoin('shopManagement.shopInfo', 'shopInfo')
                     .where('shopManagement.shopManagementKey = :shopManagementKey', { shopManagementKey: doc.data().reference3 })
                     .andWhere('shopInfo.id IN (:...permissions)', { permissions: permissions })
+                    .withDeleted()
                     .getOne();
                 if(!branchData){
                     return null;
