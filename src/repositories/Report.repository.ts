@@ -40,6 +40,7 @@ interface BranchIncomeRawRow {
     programName: string;
     shopManagementName: string;
     deletedAt: Date | string | null;
+    machineProgramDeletedAt: Date | string | null;
 }
 
 export class ReportRepository {
@@ -184,14 +185,15 @@ export class ReportRepository {
         const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
         // IMPORTANT:
-        // - join shop_management WITHOUT filtering sm.deleted_at to include soft-deleted
+        // - join shop_management and machine_program WITHOUT filtering deleted_at to include soft-deleted
+        //   (a transaction must still appear in the report even after its price/machine is deleted)
         // - keep other joins filtering deleted_at like before
         const baseFrom = `
                 FROM machine_transaction mt
                 INNER JOIN shop_info si ON si.id = mt.shop_info_id AND si.deleted_at IS NULL
                 INNER JOIN machine_info mi ON mi.id = mt.machine_info_id AND mi.deleted_at IS NULL
                 INNER JOIN program_info pi ON pi.id = mt.program_info_id AND pi.deleted_at IS NULL
-                INNER JOIN machine_program mp ON mp.id = mt.machine_program_id AND mp.deleted_at IS NULL
+                INNER JOIN machine_program mp ON mp.id = mt.machine_program_id
                 INNER JOIN shop_management sm ON sm.id = mt.shop_management_id
                 ${whereSql}
                         `.trim();
@@ -218,7 +220,8 @@ export class ReportRepository {
                 mi.machine_type AS "machineType",
                 pi.program_name AS "programName",
                 sm.shop_management_name AS "shopManagementName",
-                sm.deleted_at AS "deletedAt"
+                sm.deleted_at AS "deletedAt",
+                mp.deleted_at AS "machineProgramDeletedAt"
                 ${baseFrom}
                 ORDER BY mt.created_at DESC
                 LIMIT ${limitNum} OFFSET ${offset}
@@ -239,6 +242,7 @@ export class ReportRepository {
             machineInfo: { machineType: r.machineType },
             programInfo: { programName: r.programName },
             shopManagement: { shopManagementName: r.shopManagementName, deletedAt: r.deletedAt },
+            machineProgram: { deletedAt: r.machineProgramDeletedAt },
         }));
 
         return {
@@ -344,7 +348,8 @@ export class ReportRepository {
         const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
         // IMPORTANT:
-        // - join shop_management WITHOUT filtering sm.deleted_at to include soft-deleted
+        // - join shop_management and machine_program WITHOUT filtering deleted_at to include soft-deleted
+        //   (a transaction must still appear in the report even after its price/machine is deleted)
         // - keep other joins filtering deleted_at like before
         const sql = `
             SELECT SUM(
@@ -354,7 +359,7 @@ export class ReportRepository {
             INNER JOIN shop_info si ON si.id = mt.shop_info_id AND si.deleted_at IS NULL
             INNER JOIN machine_info mi ON mi.id = mt.machine_info_id AND mi.deleted_at IS NULL
             INNER JOIN program_info pi ON pi.id = mt.program_info_id AND pi.deleted_at IS NULL
-            INNER JOIN machine_program mp ON mp.id = mt.machine_program_id AND mp.deleted_at IS NULL
+            INNER JOIN machine_program mp ON mp.id = mt.machine_program_id
             INNER JOIN shop_management sm ON sm.id = mt.shop_management_id
             ${whereSql}
             `.trim();
